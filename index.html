@@ -458,23 +458,40 @@
     /* ==========================================================
        1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
        ========================================================== */
-  let xpPool = [];
-  let selectedIds = new Set();
+let xpPool = [];
+let selectedIds = new Set();
 
-  function initStorage() {
-    const saved = localStorage.getItem('fandom_xp_list_v1');
-    if (saved) {
-      try {
-        xpPool = JSON.parse(saved);
-      } catch (e) {
-        xpPool = [...DEFAULT_POOL];
-      }
-    } else {
+function initStorage() {
+  // 更換快取 key 確保載入新詞庫
+  const saved = localStorage.getItem('choice_pool_v2');
+  if (saved) {
+    try {
+      xpPool = JSON.parse(saved);
+    } catch (e) {
       xpPool = [...DEFAULT_POOL];
-      saveStorage();
     }
-    selectedIds = new Set(xpPool.map(i => i.id));
+  } else {
+    xpPool = [...DEFAULT_POOL];
+    saveStorage();
   }
+  selectedIds = new Set(xpPool.map(i => i.id));
+}
+
+function saveStorage() {
+  localStorage.setItem('choice_pool_v2', JSON.stringify(xpPool));
+}
+
+function resetToDefaults() {
+  if (confirm('確定要重設為預設的 61 條詞庫嗎？現有自訂內容將被覆寫。')) {
+    xpPool = [...DEFAULT_POOL];
+    selectedIds = new Set(xpPool.map(i => i.id));
+    saveStorage();
+    renderRepoList();
+    updateCounts();
+    showToast('已重設為預設詞庫');
+  }
+}
+
 
 
 	async function initStorage() {
