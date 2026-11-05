@@ -491,54 +491,8 @@ function resetToDefaults() {
     showToast('已重設為預設詞庫');
   }
 }
-
-
-
-	async function initStorage() {
-	  await loadDefaultPool(); // 先等待 JSON 下載完成
-	  
-	  const saved = localStorage.getItem('fandom_xp_list_v1');
-	  if (saved) {
-		try {
-		  xpPool = JSON.parse(saved);
-		} catch (e) {
-		  xpPool = [...DEFAULT_POOL];
-		}
-	  } else {
-		xpPool = [...DEFAULT_POOL];
-		saveStorage();
-	  }
-	  selectedIds = new Set(xpPool.map(i => i.id));
-	}
-
-	// 啟動時執行
-	window.onload = async function() {
-	  await initStorage();
-	  showScreen('lobby');
-	};
-
-    let itemPool = [];
-    let selectedIds = new Set();
-
-    function initStorage() {
-      const saved = localStorage.getItem('generic_cruel_pool_v1');
-      if (saved) {
-        try {
-          itemPool = JSON.parse(saved);
-        } catch (e) {
-          itemPool = [...DEFAULT_POOL];
-        }
-      } else {
-        itemPool = [...DEFAULT_POOL];
-        saveStorage();
-      }
-      selectedIds = new Set(itemPool.map(i => i.id));
-    }
-
-    function saveStorage() {
-      localStorage.setItem('generic_cruel_pool_v1', JSON.stringify(itemPool));
-    }
-
+	
+    
     function showToast(message, icon = 'ph-check') {
       const toast = document.getElementById('toast-box');
       const toastMsg = document.getElementById('toast-msg');
