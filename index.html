@@ -458,17 +458,24 @@
     /* ==========================================================
        1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
        ========================================================== */
-    let DEFAULT_POOL = [];
-	let xpPool = [];
+  let xpPool = [];
+  let selectedIds = new Set();
 
-	async function loadDefaultPool() {
-	  try {
-		const response = await fetch('./default-pool.json');
-		DEFAULT_POOL = await response.json();
-	  } catch (error) {
-		console.error('無法加載預設詞庫:', error);
-	  }
-	}
+  function initStorage() {
+    const saved = localStorage.getItem('fandom_xp_list_v1');
+    if (saved) {
+      try {
+        xpPool = JSON.parse(saved);
+      } catch (e) {
+        xpPool = [...DEFAULT_POOL];
+      }
+    } else {
+      xpPool = [...DEFAULT_POOL];
+      saveStorage();
+    }
+    selectedIds = new Set(xpPool.map(i => i.id));
+  }
+
 
 	async function initStorage() {
 	  await loadDefaultPool(); // 先等待 JSON 下載完成
