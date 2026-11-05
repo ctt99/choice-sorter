@@ -456,80 +456,40 @@
     /* ==========================================================
        1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
        ========================================================== */
-    const DEFAULT_POOL = [
-	  {
-		id: "item_1",
-		title: "雨夜末班車與無聲陪伴",
-		tags: ["陪伴", "氛圍感", "療癒"],
-		desc: "車窗外的雨水模糊了霓虹，身邊的人沒有多說一句話，只是把耳機分了一半給你。世界很吵，但這裡很安靜。"
-	  },
-	  {
-		id: "item_2",
-		title: "反派殉道者與最後的尊嚴",
-		tags: ["宿命", "悲壯", "美學"],
-		desc: "站在全世界的對立面，哪怕明知是既定的末路，依然優雅地整理好領口赴死，至死不向世俗低下高傲的頭顱。"
-	  },
-	  {
-		id: "item_3",
-		title: "心照不宣的絕對默契",
-		tags: ["靈魂共鳴", "羈絆", "信任"],
-		desc: "不需言語對視，甚至不需要在同一個空間，就能在關鍵時刻精準替對方補上最後一塊拼圖或扣下扳機的信任感。"
-	  },
-	  {
-		id: "item_4",
-		title: "神壇跌落與泥濘共生",
-		tags: ["反差", "救贖", "情感拉扯"],
-		desc: "曾高高在上不可一世的存在，在被命運踐踏至泥沼時，唯有另一個同樣殘破的靈魂接住了他所有的狼狽與脆弱。"
-	  },
-	  {
-		id: "item_5",
-		title: "久別重逢但彼此早已認出",
-		tags: ["宿命", "重逢", "酸甜"],
-		desc: "經過數年歲月或時空流轉，即使容顏與身份全非，交會的那一眼依然能在人海中瞬間穿透偽裝、認出彼此靈魂。"
-	  },
-	  {
-		id: "item_6",
-		title: "理智崩塌的失控瞬間",
-		tags: ["張力", "反差", "極限對抗"],
-		desc: "平時最冷靜克制、滴水不漏的掌局者，在觸及底線或深愛之人的生死時，徹底撕碎面具、露出近乎瘋魔的偏執。"
-	  },
-	  {
-		id: "item_7",
-		title: "宿敵在黃昏廢墟裡的最後和解",
-		tags: ["羈絆", "宿命", "釋懷"],
-		desc: "鬥了一輩子、招招見血的對手，在世界崩塌後的餘燼前並肩坐下，遞出一根菸或水壺，共享一生僅有一次的平靜。"
-	  },
-	  {
-		id: "item_8",
-		title: "暴風雨夜的孤島壁爐",
-		tags: ["安全感", "密閉空間", "依戀"],
-		desc: "窗外狂風怒號、與世隔絕，屋內只有柴火劈啪與毛毯的溫度。只要這扇門不打開，全世界的災難就與我們無關。"
-	  },
-	  {
-		id: "item_9",
-		title: "以惡制惡的孤獨執法者",
-		tags: ["暗黑", "原則", "正義"],
-		desc: "不指望被任何人理解，甘願弄髒雙手墮入地獄，只為在無人注視的陰影裡鏟除真正的惡蛆與虛偽的秩序。"
-	  },
-	  {
-		id: "item_10",
-		title: "年少約定在現實殘酷下的褪色",
-		tags: ["痛感", "現實", "遺憾"],
-		desc: "曾經在夏夜星空下發誓永遠不變的誓言，在成人世界的柴米油鹽與名利碾壓下，相視一笑時只剩下客氣與無言以對。"
-	  },
-	  {
-		id: "item_11",
-		title: "深淵邊緣的盲目信任",
-		tags: ["信任", "極限", "羈絆"],
-		desc: "哪怕眼前是萬丈懸崖，只要對方伸出手說了一聲『跳』，連一秒鐘的猶豫都沒有就縱身躍入虛無。"
-	  },
-	  {
-		id: "item_12",
-		title: "平淡街角的市井煙火長情",
-		tags: ["日常甜", "細水長流", "陪伴"],
-		desc: "沒有轟轟烈烈的冒險，只有菜市場的討價還價、睡前互相暖腳，以及幾十年如一日在玄關為對方留的那盞昏黃小燈。"
+    let DEFAULT_POOL = [];
+	let xpPool = [];
+
+	async function loadDefaultPool() {
+	  try {
+		const response = await fetch('./default-pool.json');
+		DEFAULT_POOL = await response.json();
+	  } catch (error) {
+		console.error('無法加載預設詞庫:', error);
 	  }
-	];
+	}
+
+	async function initStorage() {
+	  await loadDefaultPool(); // 先等待 JSON 下載完成
+	  
+	  const saved = localStorage.getItem('fandom_xp_list_v1');
+	  if (saved) {
+		try {
+		  xpPool = JSON.parse(saved);
+		} catch (e) {
+		  xpPool = [...DEFAULT_POOL];
+		}
+	  } else {
+		xpPool = [...DEFAULT_POOL];
+		saveStorage();
+	  }
+	  selectedIds = new Set(xpPool.map(i => i.id));
+	}
+
+	// 啟動時執行
+	window.onload = async function() {
+	  await initStorage();
+	  showScreen('lobby');
+	};
 
     let itemPool = [];
     let selectedIds = new Set();
