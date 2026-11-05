@@ -458,41 +458,29 @@
     /* ==========================================================
        1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
        ========================================================== */
-let xpPool = [];
-let selectedIds = new Set();
+    let itemPool = [];
+    let selectedIds = new Set();
 
-function initStorage() {
-  // 更換快取 key 確保載入新詞庫
-  const saved = localStorage.getItem('choice_pool_v2');
-  if (saved) {
-    try {
-      xpPool = JSON.parse(saved);
-    } catch (e) {
-      xpPool = [...DEFAULT_POOL];
+    function initStorage() {
+      // 讀取本地儲存（若為首次進入或舊版本，則以 external js 的 DEFAULT_POOL 為準）
+      const saved = localStorage.getItem('choice_pool_v2');
+      if (saved) {
+        try {
+          itemPool = JSON.parse(saved);
+        } catch (e) {
+          itemPool = typeof DEFAULT_POOL !== 'undefined' ? [...DEFAULT_POOL] : [];
+        }
+      } else {
+        itemPool = typeof DEFAULT_POOL !== 'undefined' ? [...DEFAULT_POOL] : [];
+        saveStorage();
+      }
+      selectedIds = new Set(itemPool.map(i => i.id));
     }
-  } else {
-    xpPool = [...DEFAULT_POOL];
-    saveStorage();
-  }
-  selectedIds = new Set(xpPool.map(i => i.id));
-}
 
-function saveStorage() {
-  localStorage.setItem('choice_pool_v2', JSON.stringify(xpPool));
-}
+    function saveStorage() {
+      localStorage.setItem('choice_pool_v2', JSON.stringify(itemPool));
+    }
 
-function resetToDefaults() {
-  if (confirm('確定要重設為預設的 61 條詞庫嗎？現有自訂內容將被覆寫。')) {
-    xpPool = [...DEFAULT_POOL];
-    selectedIds = new Set(xpPool.map(i => i.id));
-    saveStorage();
-    renderRepoList();
-    updateCounts();
-    showToast('已重設為預設詞庫');
-  }
-}
-	
-    
     function showToast(message, icon = 'ph-check') {
       const toast = document.getElementById('toast-box');
       const toastMsg = document.getElementById('toast-msg');
@@ -536,40 +524,41 @@ function resetToDefaults() {
     }
 
     function updateCounts() {
-	  const count = itemPool.length;
-	  const selectedCount = selectedIds.size; // 目前勾選的詞條數量
+      const count = itemPool.length;
+      const selectedCount = selectedIds.size;
 
-	  document.getElementById('nav-count').innerText = count;
-	  document.getElementById('repo-count-badge').innerText = count;
-	  document.getElementById('total-pool-count').innerText = count;
-	  document.getElementById('selected-count-badge').innerText = selectedCount;
+      document.getElementById('nav-count').innerText = count;
+      document.getElementById('repo-count-badge').innerText = count;
+      document.getElementById('total-pool-count').innerText = count;
+      document.getElementById('selected-count-badge').innerText = selectedCount;
 
-	  // 動態更新單淘汰場次標籤 (N - 1 場)
-	  const knockoutBadge = document.getElementById('badge-knockout-matches');
-	  if (knockoutBadge) {
-		const matches = selectedCount > 1 ? selectedCount - 1 : 0;
-		knockoutBadge.innerText = `極速 ${matches} 場`;
-	  }
-	  // 1. 瑞士輪估算場次：(N / 2) * 輪數 (輪數依 N 落在 3~6 輪)
-		const swissBadge = document.getElementById('badge-swiss-matches');
-		if (swissBadge) {
-		  let rounds = 5;
-		  if (selectedCount <= 8) rounds = 3;
-		  else if (selectedCount <= 16) rounds = 4;
-		  else if (selectedCount <= 32) rounds = 5;
-		  else rounds = 6;
-		  const swissMatches = Math.round((selectedCount / 2) * rounds);
-		  swissBadge.innerText = selectedCount >= 3 ? `約 ${swissMatches} 場` : '推薦快速 8 強';
-		}
+      // 1. 動態更新單淘汰場次標籤 (N - 1 場)
+      const knockoutBadge = document.getElementById('badge-knockout-matches');
+      if (knockoutBadge) {
+        const matches = selectedCount > 1 ? selectedCount - 1 : 0;
+        knockoutBadge.innerText = `極速 ${matches} 場`;
+      }
 
-		// 2. 歸併排序估算場次：N * log2(N)
-		const mergeBadge = document.getElementById('badge-merge-matches');
-		if (mergeBadge) {
-		  const mergeMatches = selectedCount > 1 ? Math.round(selectedCount * Math.log2(selectedCount)) : 0;
-		  mergeBadge.innerText = selectedCount >= 3 ? `約 ${mergeMatches} 場` : '精確全排名';
-		}
-	}
-	
+      // 2. 瑞士輪估算場次：(N / 2) * 輪數
+      const swissBadge = document.getElementById('badge-swiss-matches');
+      if (swissBadge) {
+        let rounds = 5;
+        if (selectedCount <= 8) rounds = 3;
+        else if (selectedCount <= 16) rounds = 4;
+        else if (selectedCount <= 32) rounds = 5;
+        else rounds = 6;
+        const swissMatches = Math.round((selectedCount / 2) * rounds);
+        swissBadge.innerText = selectedCount >= 3 ? `約 ${swissMatches} 場` : '推薦快速 8 強';
+      }
+
+      // 3. 歸併排序估算場次：N * log2(N)
+      const mergeBadge = document.getElementById('badge-merge-matches');
+      if (mergeBadge) {
+        const mergeMatches = selectedCount > 1 ? Math.round(selectedCount * Math.log2(selectedCount)) : 0;
+        mergeBadge.innerText = selectedCount >= 3 ? `約 ${mergeMatches} 場` : '精確全排名';
+      }
+    }
+
     function renderLobby() {
       updateCounts();
       renderTagPills();
@@ -667,22 +656,20 @@ function resetToDefaults() {
     /* ==========================================================
        3. 錦標賽對決引擎 (Knockout / Swiss / Merge Sort)
        ========================================================== */
-    let tournamentMode = 'knockout'; // 'knockout' | 'swiss' | 'merge'
+    let tournamentMode = 'knockout';
     let currentDuel = null;
     let historyStack = [];
 
-    // 單淘汰模式狀態
     let knockoutState = {
-      roundsQueue: [],      // 每一層級的淘汰對決名單
+      roundsQueue: [],
       currentRoundItems: [],
       nextRoundWinners: [],
       matchIdx: 0,
       totalMatches: 0,
       completedMatches: 0,
-      eliminationTiers: {}  // 記錄淘汰階段，便於推導前 8 強排位
+      eliminationTiers: {}
     };
 
-    // 瑞士輪模式狀態
     let swissState = {
       players: [],
       roundsTotal: 5,
@@ -692,7 +679,6 @@ function resetToDefaults() {
       totalCompletedMatches: 0
     };
 
-    // 歸併排序模式狀態
     let mergeState = {
       items: [],
       runs: [],
@@ -730,42 +716,37 @@ function resetToDefaults() {
       nextBattleStep();
     }
 
-    // --- 傳統單淘汰演算法 ---
     function initKnockoutTournament(participants) {
       const shuffled = shuffleArray(participants);
       const n = shuffled.length;
       
-      // 計算最靠近且大於等於 n 的 2 次冪，處理輪空 (Bye)
       let pow = 1;
       while (pow < n) pow *= 2;
       const numByes = pow - n;
-      const round1Count = n - numByes; // 第一輪需交鋒的人數
+      const round1Count = n - numByes;
 
       const round1Contenders = shuffled.slice(0, round1Count);
-      const byeAdvance = shuffled.slice(round1Count); // 自動輪空保送下一輪者
+      const byeAdvance = shuffled.slice(round1Count);
 
       knockoutState = {
         currentRoundItems: round1Contenders,
         nextRoundWinners: [...byeAdvance],
         matchIdx: 0,
-        totalMatches: n - 1, // 錦標賽經典總場次 N - 1
+        totalMatches: n - 1,
         completedMatches: 0,
         eliminationTiers: {
-          roundRanks: [] // 倒序記錄淘汰者
+          roundRanks: []
         }
       };
     }
 
     function nextKnockoutStep() {
-      // 本輪打完，晉級至下一輪
       if (knockoutState.matchIdx * 2 >= knockoutState.currentRoundItems.length) {
         if (knockoutState.nextRoundWinners.length === 1) {
-          // 冠軍誕生！
           finishTournament();
           return;
         }
 
-        // 進入下一輪對決
         knockoutState.currentRoundItems = shuffleArray(knockoutState.nextRoundWinners);
         knockoutState.nextRoundWinners = [];
         knockoutState.matchIdx = 0;
@@ -781,7 +762,6 @@ function resetToDefaults() {
       updateBattleUI();
     }
 
-    // --- 瑞士輪演算法 ---
     function initSwissTournament(participants) {
       const shuffled = shuffleArray(participants);
       const n = shuffled.length;
@@ -868,7 +848,6 @@ function resetToDefaults() {
       updateBattleUI();
     }
 
-    // --- 歸併排序演算法 ---
     function initMergeSortTournament(participants) {
       const shuffled = shuffleArray(participants);
       const runs = shuffled.map(item => [item]);
@@ -928,7 +907,6 @@ function resetToDefaults() {
       }
     }
 
-    // --- 對決派發 ---
     function nextBattleStep() {
       if (tournamentMode === 'knockout') {
         nextKnockoutStep();
@@ -1028,7 +1006,6 @@ function resetToDefaults() {
         const loser = winnerIndex === 0 ? currentDuel.itemB : currentDuel.itemA;
 
         knockoutState.nextRoundWinners.push(winner);
-        // 將敗者推入該輪淘汰隊列，保持排位推導
         if (!knockoutState.eliminationTiers.roundRanks) knockoutState.eliminationTiers.roundRanks = [];
         knockoutState.eliminationTiers.roundRanks.push(loser);
 
@@ -1065,7 +1042,6 @@ function resetToDefaults() {
       recordStateForUndo();
 
       if (tournamentMode === 'knockout') {
-        // 單淘汰必須產生勝者，平手隨機決定一人晉級
         const rndWinner = Math.random() > 0.5 ? 0 : 1;
         showToast('單淘汰制平手：隨機指派一方晉級');
         chooseWinner(rndWinner);
@@ -1097,7 +1073,6 @@ function resetToDefaults() {
       }
     }
 
-    // 鍵盤快捷鍵支援
     window.addEventListener('keydown', (e) => {
       const battleScreen = document.getElementById('screen-battle');
       if (battleScreen.classList.contains('hidden')) return;
@@ -1121,10 +1096,8 @@ function resetToDefaults() {
 
     function finishTournament() {
       if (tournamentMode === 'knockout') {
-        // 冠軍為最後倖存者，其餘排名依照淘汰先後反轉（越晚淘汰排名越高）
         const champion = knockoutState.nextRoundWinners[0] || knockoutState.currentRoundItems[0];
         const losersReversed = [...(knockoutState.eliminationTiers.roundRanks || [])].reverse();
-        // 排除可能重複的項目
         const seen = new Set();
         finalRankings = [champion, ...losersReversed].filter(item => {
           if (!item || seen.has(item.id)) return false;
