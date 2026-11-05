@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XP 殘酷二選一錦標賽</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            fandom: {
+              dark: '#0d0b14',
+              surface: '#171424',
+              card: '#1f1b33',
+              border: '#332b53',
+              primary: '#9d4edd',
+              accent: '#f72585',
+              glow: '#ff70a6',
+              gold: '#ffd166',
+              silver: '#e0e1dd',
+              bronze: '#cd7f32'
+            }
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"PingFang TC"', '"Noto Sans TC"', 'sans-serif'],
+            serif: ['"Noto Serif TC"', '"Songti TC"', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0b14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #332b53;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9d4edd;
+    }
+    /* Ambient Glows */
+    .glow-accent {
+      box-shadow: 0 0 25px -5px rgba(247, 37, 133, 0.35);
+    }
+    .glow-primary {
+      box-shadow: 0 0 25px -5px rgba(157, 78, 221, 0.35);
+    }
+    .card-hover-fx {
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-hover-fx:hover {
+      transform: translateY(-4px) scale(1.015);
+      border-color: #f72585;
+    }
+  </style>
+</head>
+<body class="bg-fandom-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-fandom-accent selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="border-b border-fandom-border/80 bg-fandom-surface/80 backdrop-blur sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('lobby')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-fandom-accent to-fandom-primary flex items-center justify-center shadow-lg shadow-fandom-accent/30 text-white font-bold text-lg">
+          <i class="ph-bold ph-heartbeat"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 bg-clip-text text-transparent">
+            同人女 XP 殘酷二選一
+          </h1>
+          <p class="text-xs text-purple-300/60 hidden sm:block">循環賽制 · 前 8 強誕生 · 靈魂喜好排序</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="btn-nav-lobby" onclick="showScreen('lobby')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-purple-200 hover:bg-fandom-card flex items-center gap-1.5">
+          <i class="ph ph-swords text-base"></i><span>對決大廳</span>
+        </button>
+        <button id="btn-nav-repo" onclick="showScreen('repo')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-purple-200 hover:bg-fandom-card flex items-center gap-1.5">
+          <i class="ph ph-books text-base"></i><span>XP 詞庫庫存 (<span id="nav-count">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+    <!-- SCREEN 1: LOBBY & PREPARATION -->
+    <section id="screen-lobby" class="space-y-6">
+      <!-- Hero Card -->
+      <div class="relative overflow-hidden rounded-2xl border border-fandom-border bg-gradient-to-b from-fandom-surface to-fandom-dark p-6 sm:p-8">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-fandom-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -top-12 w-64 h-64 bg-fandom-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-2xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-fandom-accent/20 text-fandom-glow border border-fandom-accent/40 mb-3">
+            <i class="ph-fill ph-sparkle"></i> Fandom Tropes Showdown
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white mb-2">
+            篩選你的性癖，發動殘酷審判。
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            XP 數量過多導致循環賽打不完？透過<span class="text-pink-400 font-semibold">「瑞士輪」</span>或<span class="text-purple-400 font-semibold">「歸併排序」</span>演算法，只需數十到百場左右的二選一抉擇，即可在維持低負擔的情況下，排定靈魂深處的前 8 強王座！
+          </p>
+        </div>
+
+        <!-- Mode Selection & Summary -->
+        <div class="mt-6 pt-6 border-t border-fandom-border/60 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Swiss System Option -->
+          <label class="relative flex flex-col p-4 rounded-xl border border-fandom-border bg-fandom-card/50 hover:bg-fandom-card cursor-pointer transition select-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="flex items-center gap-2 font-bold text-white text-base">
+                <input type="radio" name="tour-mode" value="swiss" checked class="text-fandom-accent focus:ring-0 accent-pink-500 w-4 h-4">
+                瑞士輪模式 (Swiss-System)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono">快速挑出 8 強</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              勝者組打勝者組、同戰績兩兩廝殺。進行 5~6 輪對決，場次極少、爽度極高，最適合 30~70 個詞條快速鎖定前 8 強！
+            </p>
+          </label>
+
+          <!-- Merge Sort Option -->
+          <label class="relative flex flex-col p-4 rounded-xl border border-fandom-border bg-fandom-card/50 hover:bg-fandom-card cursor-pointer transition select-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="flex items-center gap-2 font-bold text-white text-base">
+                <input type="radio" name="tour-mode" value="merge" class="text-fandom-accent focus:ring-0 accent-pink-500 w-4 h-4">
+                智慧歸併排序模式 (Merge Sort)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">精確全排名</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              電腦科學經典排序，透過兩兩比較決定絕對先後。比完全循環賽節省數倍對抗，能排定完整的第 1 到第 N 名。
+            </p>
+          </label>
+        </div>
+      </div>
+
+      <!-- Tag Filters & Entry Selector -->
+      <div class="bg-fandom-surface rounded-2xl border border-fandom-border p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="ph-bold ph-funnel text-fandom-glow"></i>
+              參賽 XP 篩選與確認
+            </h3>
+            <p class="text-xs text-slate-400">勾選標籤或個別詞條，目前已選取：<span id="selected-count-badge" class="font-bold text-fandom-glow text-sm">0</span> / <span id="total-pool-count">0</span> 條</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleSelectAll(true)" class="px-2.5 py-1 text-xs rounded-lg border border-fandom-border hover:bg-fandom-card text-slate-300 transition">全選</button>
+            <button onclick="toggleSelectAll(false)" class="px-2.5 py-1 text-xs rounded-lg border border-fandom-border hover:bg-fandom-card text-slate-300 transition">全取消</button>
+          </div>
+        </div>
+
+        <!-- Tag Quick Filter Pills -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-purple-300/80 uppercase tracking-wider">依標籤快速勾選：</label>
+          <div id="tag-pill-container" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+            <!-- Dynamic tags -->
+          </div>
+        </div>
+
+        <!-- Scrollable XP Items Grid -->
+        <div class="border-t border-fandom-border/60 pt-3">
+          <div id="pool-item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto pr-1">
+            <!-- Dynamic pool cards -->
+          </div>
+        </div>
+
+        <!-- Start Tournament Action Bar -->
+        <div class="pt-3 border-t border-fandom-border flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-xs text-slate-400 flex items-center gap-2">
+            <i class="ph-bold ph-info text-purple-400"></i>
+            <span>建議參賽數：至少 <strong class="text-pink-300">8</strong> 項（排出前 8 強）。上限無限制。</span>
+          </div>
+          <button onclick="startTournament()" id="btn-start" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-fandom-accent to-fandom-primary hover:from-pink-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 text-base transition transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+            <i class="ph-bold ph-play"></i>
+            開始 XP 殘酷對決
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: BATTLE ARENA (二選一對決) -->
+    <section id="screen-battle" class="hidden flex flex-col space-y-4">
+      <!-- Status & Progress -->
+      <div class="bg-fandom-surface/90 border border-fandom-border rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-fandom-accent animate-ping"></span>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-purple-300 font-bold" id="battle-round-title">對決進行中</div>
+            <div class="text-sm font-semibold text-white">第 <span id="current-match-idx" class="text-pink-400 text-lg">1</span> 場對決</div>
+          </div>
+        </div>
+
+        <!-- Progress Bar and Estimated Battles -->
+        <div class="w-full sm:w-64 flex flex-col gap-1">
+          <div class="flex justify-between text-xs text-slate-400 font-mono">
+            <span>進度</span>
+            <span id="battle-progress-text">0%</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-fandom-card overflow-hidden">
+            <div id="battle-progress-bar" class="h-full bg-gradient-to-r from-fandom-primary to-fandom-accent transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <span id="match-estimate-note" class="text-[10px] text-right text-slate-500">預估尚餘場次計算中...</span>
+        </div>
+      </div>
+
+      <!-- Duel Match Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 my-2">
+        <!-- Option A (Left) -->
+        <button id="card-choice-a" onclick="chooseWinner(0)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-fandom-card to-fandom-surface border-2 border-fandom-border focus:outline-none flex flex-col justify-between min-h-[320px] sm:min-h-[380px] shadow-xl">
+          <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-pink-300 group-hover:bg-fandom-accent group-hover:text-white transition">
+            A
+          </div>
+          <div class="space-y-4">
+            <div id="tags-a" class="flex flex-wrap gap-1.5"></div>
+            <h3 id="title-a" class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight leading-snug group-hover:text-pink-300 transition"></h3>
+            <p id="desc-a" class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans"></p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-purple-300/80">
+            <span class="group-hover:text-pink-400 transition font-medium flex items-center gap-1">
+              <i class="ph-bold ph-heart"></i> 我更嗜好此 XP
+            </span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">點擊選擇</span>
+          </div>
+        </button>
+
+        <!-- Option B (Right) -->
+        <button id="card-choice-b" onclick="chooseWinner(1)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-fandom-card to-fandom-surface border-2 border-fandom-border focus:outline-none flex flex-col justify-between min-h-[320px] sm:min-h-[380px] shadow-xl">
+          <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-purple-300 group-hover:bg-fandom-primary group-hover:text-white transition">
+            B
+          </div>
+          <div class="space-y-4">
+            <div id="tags-b" class="flex flex-wrap gap-1.5"></div>
+            <h3 id="title-b" class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight leading-snug group-hover:text-purple-300 transition"></h3>
+            <p id="desc-b" class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans"></p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-purple-300/80">
+            <span class="group-hover:text-purple-400 transition font-medium flex items-center gap-1">
+              <i class="ph-bold ph-heart"></i> 我更嗜好此 XP
+            </span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">點擊選擇</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Action Controls (Tie / Undo / Forfeit) -->
+      <div class="flex items-center justify-center flex-wrap gap-3 pt-2">
+        <button onclick="chooseTie()" class="px-5 py-2.5 rounded-xl border border-fandom-border bg-fandom-surface hover:bg-fandom-card text-purple-200 text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+          <i class="ph ph-scales text-base text-amber-400"></i>
+          <span>都太香了 / 平手難割捨</span>
+        </button>
+        <button id="btn-undo" onclick="undoChoice()" disabled class="px-4 py-2.5 rounded-xl border border-fandom-border bg-fandom-surface hover:bg-fandom-card text-slate-300 text-sm font-medium transition flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none">
+          <i class="ph ph-arrow-u-up-left text-base"></i>
+          <span>回上一步</span>
+        </button>
+        <button onclick="terminateEarly()" class="px-4 py-2.5 rounded-xl border border-rose-900/40 bg-rose-950/20 hover:bg-rose-900/40 text-rose-300 text-sm font-medium transition flex items-center gap-1.5">
+          <i class="ph ph-stop-circle text-base"></i>
+          <span>提早結算</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: RESULT & TOP 8 HALL OF FAME -->
+    <section id="screen-result" class="hidden space-y-8 pb-12">
+      <!-- Title Card -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/30">
+          <i class="ph-fill ph-crown"></i> 最終審判殿堂
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold font-serif text-white tracking-tight">
+          靈魂性癖殿堂 · 前 8 強王座
+        </h2>
+        <p class="text-sm text-slate-400">
+          經過無數次靈魂拷問與二選一抉擇，你的同人世界觀頂點已確定：
+        </p>
+      </div>
+
+      <!-- Top 3 Podium (Crown, Silver, Bronze) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch pt-2">
+        <!-- #2 Silver -->
+        <div id="podium-2" class="order-2 md:order-1 bg-gradient-to-b from-fandom-card to-fandom-surface rounded-2xl border border-slate-400/40 p-5 flex flex-col justify-between relative shadow-lg">
+          <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-300 text-slate-900 flex items-center gap-1 shadow">
+            <i class="ph-bold ph-medal"></i> 亞軍 #2
+          </div>
+          <div class="mt-2 space-y-2">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-xl font-bold font-serif text-white"></h4>
+            <p class="desc-slot text-xs text-slate-300 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-slate-400"></div>
+        </div>
+
+        <!-- #1 Gold (Trophy Center) -->
+        <div id="podium-1" class="order-1 md:order-2 bg-gradient-to-b from-amber-950/40 via-fandom-card to-fandom-surface rounded-2xl border-2 border-amber-400/80 p-6 flex flex-col justify-between relative shadow-2xl md:-translate-y-3 glow-primary">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-300 to-yellow-500 text-slate-950 flex items-center gap-1.5 shadow-lg">
+            <i class="ph-fill ph-crown-simple text-sm"></i> 冠軍 #1 至尊本命
+          </div>
+          <div class="mt-3 space-y-3">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-2xl font-black font-serif text-amber-200"></h4>
+            <p class="desc-slot text-sm text-slate-200 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-amber-400/20 text-xs font-mono text-amber-300/80"></div>
+        </div>
+
+        <!-- #3 Bronze -->
+        <div id="podium-3" class="order-3 md:order-3 bg-gradient-to-b from-fandom-card to-fandom-surface rounded-2xl border border-amber-700/50 p-5 flex flex-col justify-between relative shadow-lg">
+          <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-700 text-amber-100 flex items-center gap-1 shadow">
+            <i class="ph-bold ph-medal"></i> 季軍 #3
+          </div>
+          <div class="mt-2 space-y-2">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-xl font-bold font-serif text-white"></h4>
+            <p class="desc-slot text-xs text-slate-300 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-slate-400"></div>
+        </div>
+      </div>
+
+      <!-- Rank 4 to 8 Badges Grid -->
+      <div class="bg-fandom-surface border border-fandom-border rounded-2xl p-5 space-y-3">
+        <h3 class="text-sm font-bold text-purple-300 flex items-center gap-2">
+          <i class="ph-bold ph-star"></i> 八強守門列席 (第 4 ~ 8 名)
+        </h3>
+        <div id="ranks-4-to-8" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <!-- Dynamic 4-8 slots -->
+        </div>
+      </div>
+
+      <!-- Full Ranking Accordion (All participants) -->
+      <div class="bg-fandom-surface border border-fandom-border rounded-2xl p-5">
+        <details class="group">
+          <summary class="flex items-center justify-between cursor-pointer list-none text-sm font-bold text-slate-200 hover:text-white">
+            <span class="flex items-center gap-2">
+              <i class="ph-bold ph-list-numbers text-fandom-accent"></i>
+              檢視全部參賽詞條排名名單 (<span id="total-ranked-count"></span> 項)
+            </span>
+            <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div id="full-rank-list" class="mt-4 divide-y divide-fandom-border/40 text-xs sm:text-sm">
+            <!-- Dynamic full list -->
+          </div>
+        </details>
+      </div>
+
+      <!-- Export & Share Actions -->
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
+        <button onclick="copyResultText()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-fandom-accent to-fandom-primary hover:opacity-90 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-pink-600/20">
+          <i class="ph-bold ph-copy"></i>
+          一鍵複製 8 強清單 (發噗浪/推特)
+        </button>
+        <button onclick="showScreen('lobby')" class="px-5 py-2.5 rounded-xl border border-fandom-border bg-fandom-card hover:bg-fandom-border text-slate-200 text-sm font-semibold flex items-center gap-2">
+          <i class="ph-bold ph-arrows-counter-clockwise"></i>
+          重新選擇 / 再玩一次
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: VOCABULARY REPOSITORY MANAGEMENT -->
+    <section id="screen-repo" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-fandom-border pb-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold font-serif text-white flex items-center gap-2">
+            <i class="ph-bold ph-books text-fandom-glow"></i>
+            XP 詞庫管理與自訂
+          </h2>
+          <p class="text-xs text-slate-400">目前詞庫存量：<span id="repo-count-badge" class="font-bold text-pink-400">0</span> 項（支援本地 localStorage 自動儲存）</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openAddModal()" class="px-3 py-1.5 rounded-lg bg-fandom-accent hover:bg-pink-600 text-white text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-plus"></i> 新增單條 XP
+          </button>
+          <button onclick="openBatchModal()" class="px-3 py-1.5 rounded-lg bg-fandom-card hover:bg-fandom-border border border-fandom-border text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-file-arrow-up"></i> 批次匯入/匯出
+          </button>
+          <button onclick="resetToDefaults()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i> 重設為預設詞庫
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filter Inside Repo -->
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+          <input type="text" id="repo-search-input" oninput="renderRepoList()" placeholder="搜尋詞條名稱、描述或標籤..." class="w-full pl-9 pr-4 py-2 bg-fandom-surface rounded-xl border border-fandom-border text-sm text-slate-200 focus:outline-none focus:border-fandom-accent">
+        </div>
+      </div>
+
+      <!-- Repo Cards List -->
+      <div id="repo-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Dynamic repo items -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD / EDIT SINGLE XP -->
+  <div id="modal-item" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-fandom-surface border border-fandom-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-fandom-border pb-3">
+        <h3 id="modal-item-title" class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-bold ph-pencil-simple text-fandom-accent"></i> 新增 / 編輯 XP 詞條
+        </h3>
+        <button onclick="closeModal('modal-item')" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <input type="hidden" id="edit-item-id">
+
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">XP 詞條名稱 *</label>
+          <input type="text" id="input-title" placeholder="例如：偽骨科、竹馬相殺、ABO標記..." class="w-full px-3 py-2 bg-fandom-card rounded-lg border border-fandom-border text-slate-200 focus:outline-none focus:border-fandom-accent">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">分類 Tags (以半形逗號或空白分開)</label>
+          <input type="text" id="input-tags" placeholder="例如：背德, 羈絆, 虐戀" class="w-full px-3 py-2 bg-fandom-card rounded-lg border border-fandom-border text-slate-200 focus:outline-none focus:border-fandom-accent">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">XP 詳細描述 / 萌點說明</label>
+          <textarea id="input-desc" rows="3" placeholder="簡述此屬性戳中同人女心臟的痛點與萌點..." class="w-full px-3 py-2 bg-fandom-card rounded-lg border border-fandom-border text-slate-200 focus:outline-none focus:border-fandom-accent"></textarea>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-fandom-border flex justify-end gap-2">
+        <button onclick="closeModal('modal-item')" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:bg-fandom-card">取消</button>
+        <button onclick="saveItemFromModal()" class="px-5 py-2 rounded-lg bg-fandom-accent hover:bg-pink-600 text-white text-xs font-bold shadow-lg shadow-pink-600/30">儲存詞條</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BATCH IMPORT & EXPORT -->
+  <div id="modal-batch" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-fandom-surface border border-fandom-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-fandom-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-bold ph-arrows-left-right text-purple-400"></i> XP 詞庫批次匯入 / 匯出
+        </h3>
+        <button onclick="closeModal('modal-batch')" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-300">
+          <span>支援格式：一行一筆，格式為：<strong>名稱 / 描述 / 標籤1,標籤2</strong></span>
+          <button onclick="loadBatchSample()" class="text-fandom-glow hover:underline">帶入範例格式</button>
+        </div>
+        <textarea id="batch-textarea" rows="8" placeholder="偽骨科 / 無血緣兄弟姊妹戀情 / 背德,羈絆
+宿敵相愛相殺 / 站在對立立場卻靈魂共鳴 / 痛虐,命定
+雙向暗戀 / 彼此都在裝不在意但細節藏不住 / 甜虐,純愛" class="w-full font-mono text-xs px-3 py-2 bg-fandom-card rounded-lg border border-fandom-border text-slate-200 focus:outline-none focus:border-fandom-accent"></textarea>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-fandom-border">
+        <div class="flex gap-2">
+          <button onclick="exportCurrentAsText()" class="px-3 py-1.5 rounded-lg border border-fandom-border hover:bg-fandom-card text-xs text-purple-300">產生目前文字匯出</button>
+          <button onclick="exportCurrentAsJSON()" class="px-3 py-1.5 rounded-lg border border-fandom-border hover:bg-fandom-card text-xs text-purple-300">複製 JSON</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-batch')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300">關閉</button>
+          <button onclick="importFromBatchText()" class="px-4 py-1.5 rounded-lg bg-fandom-accent hover:bg-pink-600 text-white text-xs font-bold">確認匯入新增</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Message Box -->
+  <div id="toast-box" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-xl bg-fandom-card border border-fandom-accent/60 text-white text-sm shadow-xl shadow-black/50">
+    <i id="toast-icon" class="ph-bold ph-check text-fandom-glow text-lg"></i>
+    <span id="toast-msg">通知內容</span>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    /* ==========================================================
+       1. DEFAULT TROPES / XP DATABASE & STORAGE
+       ========================================================== */
+    const DEFAULT_XP_LIST = [
+      {
+        id: "xp_1",
+        title: "偽骨科",
+        desc: "同在一個屋簷下、無血緣關係的兄弟姊妹或養兄弟。在法律與倫理邊界暗生情愫，充滿極致拉扯與禁忌窺探感。",
+        tags: ["背德", "羈絆", "禁忌"]
+      },
+      {
+        id: "xp_2",
+        title: "宿敵相愛相殺",
+        desc: "立場天生對立，手中利刃刺向對方心臟時比任何人都溫柔；全世界只有你配當我的對手與殉道者。",
+        tags: ["痛虐", "命定", "相愛相殺"]
+      },
+      {
+        id: "xp_3",
+        title: "破鏡重圓",
+        desc: "年少因誤會、現實或生離死別而分開，數年後重逢。看似冷漠成熟的表皮下，舊情宛如死灰復燃般劇烈崩塌。",
+        tags: ["酸甜", "重逢", "追妻/夫"]
+      },
+      {
+        id: "xp_4",
+        title: "年下小狼狗 / 陰濕綠茶攻",
+        desc: "表面乖巧聽話叫著哥哥/前輩，轉身卻以絕對強勢的身高與佔有慾將對方拆吃入腹，步步為營的捕獵者。",
+        tags: ["年下", "反差", "獨佔慾"]
+      },
+      {
+        id: "xp_5",
+        title: "ABO 發情期與完全標記",
+        desc: "信息素在空氣中暴走炸裂，失去理智的本能臣服與後頸咬痕。將靈魂與肉體徹底烙印的絕對臣服契約。",
+        tags: ["肉香", "本能", "信息素"]
+      },
+      {
+        id: "xp_6",
+        title: "竹馬竹馬 (幼馴染)",
+        desc: "分享了彼此所有童年與青春期秘密。在「理所當然的習慣」中萌芽出隱密私慾，害怕踏破朋友界線的克制痛感。",
+        tags: ["純愛", "習慣", "暗戀"]
+      },
+      {
+        id: "xp_7",
+        title: "病嬌執念與金絲雀禁錮",
+        desc: "「只要你的眼裡只有我就好」。腳踝的金屬鎖鏈、斷絕一切對外社交，狂熱且近乎毀滅性的極致愛意。",
+        tags: ["黑化", "禁錮", "精神控制"]
+      },
+      {
+        id: "xp_8",
+        title: "雙向暗戀 (全世界都知道你們相愛)",
+        desc: "兩個人都在自卑與試探，小心翼翼收起鋒芒與渴望，每一個微小的肢體碰觸都如觸電般在內心掀起驚滔駭浪。",
+        tags: ["甜虐", "純愛", "極限拉扯"]
+      },
+      {
+        id: "xp_9",
+        title: "替身文學與白月光覺醒",
+        desc: "「你只是像他，別妄想太多」。直到真正失去時，才驚覺原來白月光早已褪色，替身已入骨髓成毒。",
+        tags: ["火葬場", "痛虐", "後悔莫及"]
+      },
+      {
+        id: "xp_10",
+        title: "神明墮落與信徒背叛",
+        desc: "高高在上清冷禁慾的神祇，為了唯一的凡人走下神壇染上塵埃；或者狂熱信徒將神明拉入慾望泥沼共沉淪。",
+        tags: ["神聖褻瀆", "救贖", "支配"]
+      }
+    ];
+
+    let xpPool = [];
+    let selectedIds = new Set();
+
+    function initStorage() {
+      const saved = localStorage.getItem('fandom_xp_list_v1');
+      if (saved) {
+        try {
+          xpPool = JSON.parse(saved);
+        } catch (e) {
+          xpPool = [...DEFAULT_XP_LIST];
+        }
+      } else {
+        xpPool = [...DEFAULT_XP_LIST];
+        saveStorage();
+      }
+      // Select all by default
+      selectedIds = new Set(xpPool.map(i => i.id));
+    }
+
+    function saveStorage() {
+      localStorage.setItem('fandom_xp_list_v1', JSON.stringify(xpPool));
+    }
+
+    function showToast(message, icon = 'ph-check') {
+      const toast = document.getElementById('toast-box');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      toastMsg.innerText = message;
+      toastIcon.className = `ph-bold ${icon} text-fandom-glow text-lg`;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    /* ==========================================================
+       2. UI NAVIGATION & RENDERING
+       ========================================================== */
+    function showScreen(screenId) {
+      ['screen-lobby', 'screen-battle', 'screen-result', 'screen-repo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+
+      // Update Nav Highlights
+      document.getElementById('btn-nav-lobby').classList.toggle('text-pink-400', screenId === 'lobby');
+      document.getElementById('btn-nav-repo').classList.toggle('text-pink-400', screenId === 'repo');
+
+      if (screenId === 'lobby') {
+        renderLobby();
+      } else if (screenId === 'repo') {
+        renderRepoList();
+      }
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const count = xpPool.length;
+      document.getElementById('nav-count').innerText = count;
+      document.getElementById('repo-count-badge').innerText = count;
+      document.getElementById('total-pool-count').innerText = count;
+      document.getElementById('selected-count-badge').innerText = selectedIds.size;
+    }
+
+    function renderLobby() {
+      updateCounts();
+      renderTagPills();
+      renderPoolItems();
+    }
+
+    function getAllTags() {
+      const tags = new Set();
+      xpPool.forEach(item => {
+        (item.tags || []).forEach(t => tags.add(t.trim()));
+      });
+      return Array.from(tags).filter(Boolean);
+    }
+
+    function renderTagPills() {
+      const container = document.getElementById('tag-pill-container');
+      container.innerHTML = '';
+      const tags = getAllTags();
+
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = "px-2.5 py-1 rounded-full text-xs font-medium border border-fandom-border bg-fandom-card/80 hover:border-pink-500 text-slate-300 transition flex items-center gap-1";
+        btn.innerHTML = `<span>#${escapeHtml(tag)}</span>`;
+        btn.onclick = () => toggleSelectByTag(tag);
+        container.appendChild(btn);
+      });
+    }
+
+    function toggleSelectByTag(tag) {
+      const matchingItems = xpPool.filter(i => (i.tags || []).includes(tag));
+      const allSelected = matchingItems.every(i => selectedIds.has(i.id));
+
+      matchingItems.forEach(item => {
+        if (allSelected) {
+          selectedIds.delete(item.id);
+        } else {
+          selectedIds.add(item.id);
+        }
+      });
+      renderPoolItems();
+      updateCounts();
+      showToast(allSelected ? `已取消選取標籤 #${tag}` : `已選取標籤 #${tag} 的全部詞條`);
+    }
+
+    function toggleSelectAll(selectAll) {
+      if (selectAll) {
+        selectedIds = new Set(xpPool.map(i => i.id));
+      } else {
+        selectedIds.clear();
+      }
+      renderPoolItems();
+      updateCounts();
+    }
+
+    function renderPoolItems() {
+      const grid = document.getElementById('pool-item-grid');
+      grid.innerHTML = '';
+
+      xpPool.forEach(item => {
+        const isSelected = selectedIds.has(item.id);
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border text-left cursor-pointer transition select-none flex flex-col justify-between ${
+          isSelected 
+            ? 'bg-purple-950/20 border-fandom-accent/60 text-white' 
+            : 'bg-fandom-card/40 border-fandom-border/60 text-slate-400 opacity-60'
+        }`;
+        card.onclick = () => {
+          if (selectedIds.has(item.id)) {
+            selectedIds.delete(item.id);
+          } else {
+            selectedIds.add(item.id);
+          }
+          renderPoolItems();
+          updateCounts();
+        };
+
+        const tagsHtml = (item.tags || []).map(t => 
+          `<span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-purple-300">#${escapeHtml(t)}</span>`
+        ).join(' ');
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-sm tracking-tight ${isSelected ? 'text-pink-300' : 'text-slate-300'}">${escapeHtml(item.title)}</span>
+              <span class="text-base">${isSelected ? '<i class="ph-fill ph-check-circle text-pink-400"></i>' : '<i class="ph ph-circle text-slate-500"></i>'}</span>
+            </div>
+            <p class="text-[11px] line-clamp-2 text-slate-400">${escapeHtml(item.desc || '')}</p>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-1">${tagsHtml}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ==========================================================
+       3. TOURNAMENT ENGINES (SWISS & MERGE SORT)
+       ========================================================== */
+    let tournamentMode = 'swiss'; // 'swiss' or 'merge'
+    let currentDuel = null;
+    let historyStack = [];
+
+    // SWISS SYSTEM STATE
+    let swissState = {
+      players: [],        // array of { id, title, desc, tags, score, opps: [], buchholz: 0 }
+      roundsTotal: 5,
+      currentRound: 1,
+      currentPairings: [],
+      pairIndex: 0,
+      totalCompletedMatches: 0
+    };
+
+    // MERGE SORT STATE
+    let mergeState = {
+      items: [],
+      runs: [],           // list of sub-arrays
+      mergeA: [],
+      mergeB: [],
+      currentMerged: [],
+      ptrA: 0,
+      ptrB: 0,
+      totalComparisons: 0,
+      estimatedTotal: 100
+    };
+
+    function startTournament() {
+      const activeIds = Array.from(selectedIds);
+      if (activeIds.length < 3) {
+        showToast('請至少選擇 3 個 XP 詞條以開始對決！', 'ph-warning');
+        return;
+      }
+
+      const modeInput = document.querySelector('input[name="tour-mode"]:checked');
+      tournamentMode = modeInput ? modeInput.value : 'swiss';
+      historyStack = [];
+
+      const participants = xpPool.filter(i => selectedIds.has(i.id));
+
+      if (tournamentMode === 'swiss') {
+        initSwissTournament(participants);
+      } else {
+        initMergeSortTournament(participants);
+      }
+
+      showScreen('battle');
+      nextBattleStep();
+    }
+
+    // --- SWISS SYSTEM LOGIC ---
+    function initSwissTournament(participants) {
+      // Shuffle initially
+      const shuffled = [...participants].sort(() => Math.random() - 0.5);
+      
+      // Calculate sensible rounds based on N: for N=30~60, 5 to 6 rounds is standard
+      const n = shuffled.length;
+      let rounds = 5;
+      if (n <= 8) rounds = 3;
+      else if (n <= 16) rounds = 4;
+      else if (n <= 32) rounds = 5;
+      else rounds = 6;
+
+      swissState = {
+        players: shuffled.map(p => ({
+          ...p,
+          score: 0,
+          opps: [],
+          buchholz: 0
+        })),
+        roundsTotal: rounds,
+        currentRound: 1,
+        currentPairings: [],
+        pairIndex: 0,
+        totalCompletedMatches: 0
+      };
+
+      generateSwissRoundPairings();
+    }
+
+    function generateSwissRoundPairings() {
+      // Sort players by score descending + slight tiebreak
+      const sorted = [...swissState.players].sort((a, b) => b.score - a.score);
+      const pairings = [];
+      const paired = new Set();
+
+      for (let i = 0; i < sorted.length; i++) {
+        if (paired.has(sorted[i].id)) continue;
+        const p1 = sorted[i];
+
+        // Find opponent with nearest score who has not played against p1
+        let bestOpp = null;
+        for (let j = i + 1; j < sorted.length; j++) {
+          const cand = sorted[j];
+          if (!paired.has(cand.id) && !p1.opps.includes(cand.id)) {
+            bestOpp = cand;
+            break;
+          }
+        }
+
+        // If no unplayed candidate, fallback to nearest available
+        if (!bestOpp) {
+          for (let j = i + 1; j < sorted.length; j++) {
+            if (!paired.has(sorted[j].id)) {
+              bestOpp = sorted[j];
+              break;
+            }
+          }
+        }
+
+        if (bestOpp) {
+          pairings.push([p1, bestOpp]);
+          paired.add(p1.id);
+          paired.add(bestOpp.id);
+        } else {
+          // Odd player bye: awarded 1 point
+          p1.score += 1;
+          paired.add(p1.id);
+        }
+      }
+
+      swissState.currentPairings = pairings;
+      swissState.pairIndex = 0;
+    }
+
+    // --- MERGE SORT LOGIC ---
+    function initMergeSortTournament(participants) {
+      const shuffled = [...participants].sort(() => Math.random() - 0.5);
+      // Each participant begins as its own sorted sub-list
+      const runs = shuffled.map(item => [item]);
+      
+      const n = participants.length;
+      // Estimate comparisons: N * log2(N)
+      const estimated = Math.round(n * Math.log2(n || 1));
+
+      mergeState = {
+        items: shuffled,
+        runs: runs,
+        mergeA: [],
+        mergeB: [],
+        currentMerged: [],
+        ptrA: 0,
+        ptrB: 0,
+        totalComparisons: 0,
+        estimatedTotal: Math.max(estimated, 1)
+      };
+
+      prepareNextMergeStep();
+    }
+
+    function prepareNextMergeStep() {
+      if (mergeState.runs.length <= 1) {
+        // Entire array sorted!
+        finishTournament();
+        return;
+      }
+
+      // Take first two runs to merge
+      mergeState.mergeA = mergeState.runs.shift();
+      mergeState.mergeB = mergeState.runs.shift();
+      mergeState.currentMerged = [];
+      mergeState.ptrA = 0;
+      mergeState.ptrB = 0;
+    }
+
+    // --- BATTLE STEP DISPATCHER ---
+    function nextBattleStep() {
+      if (tournamentMode === 'swiss') {
+        nextSwissStep();
+      } else {
+        nextMergeStep();
+      }
+    }
+
+    function nextSwissStep() {
+      if (swissState.pairIndex >= swissState.currentPairings.length) {
+        // Round completed
+        if (swissState.currentRound >= swissState.roundsTotal) {
+          finishTournament();
+          return;
+        }
+        swissState.currentRound++;
+        generateSwissRoundPairings();
+      }
+
+      const pair = swissState.currentPairings[swissState.pairIndex];
+      currentDuel = {
+        itemA: pair[0],
+        itemB: pair[1]
+      };
+
+      renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+      updateBattleUI();
+    }
+
+    function nextMergeStep() {
+      // Check if current pair comparison is active
+      if (mergeState.ptrA < mergeState.mergeA.length && mergeState.ptrB < mergeState.mergeB.length) {
+        currentDuel = {
+          itemA: mergeState.mergeA[mergeState.ptrA],
+          itemB: mergeState.mergeB[mergeState.ptrB]
+        };
+        renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+        updateBattleUI();
+      } else {
+        // Flush remnants
+        while (mergeState.ptrA < mergeState.mergeA.length) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        }
+        while (mergeState.ptrB < mergeState.mergeB.length) {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        // Push merged run to back of queue
+        mergeState.runs.push(mergeState.currentMerged);
+
+        if (mergeState.runs.length <= 1) {
+          finishTournament();
+        } else {
+          prepareNextMergeStep();
+          nextMergeStep();
+        }
+      }
+    }
+
+    function renderBattleCards(itemA, itemB) {
+      document.getElementById('title-a').innerText = itemA.title;
+      document.getElementById('desc-a').innerText = itemA.desc || '無特定描述。';
+      document.getElementById('tags-a').innerHTML = (itemA.tags || []).map(t => 
+        `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-pink-500/10 border border-pink-500/30 text-pink-300">#${escapeHtml(t)}</span>`
+      ).join('');
+
+      document.getElementById('title-b').innerText = itemB.title;
+      document.getElementById('desc-b').innerText = itemB.desc || '無特定描述。';
+      document.getElementById('tags-b').innerHTML = (itemB.tags || []).map(t => 
+        `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 border border-purple-500/30 text-purple-300">#${escapeHtml(t)}</span>`
+      ).join('');
+    }
+
+    function updateBattleUI() {
+      document.getElementById('btn-undo').disabled = historyStack.length === 0;
+
+      if (tournamentMode === 'swiss') {
+        const totalMatchesEstimated = (swissState.players.length / 2) * swissState.roundsTotal;
+        const currentCount = swissState.totalCompletedMatches + 1;
+        const progress = Math.min(Math.round((swissState.totalCompletedMatches / totalMatchesEstimated) * 100), 99);
+
+        document.getElementById('battle-round-title').innerText = `瑞士輪 第 ${swissState.currentRound} / ${swissState.roundsTotal} 輪`;
+        document.getElementById('current-match-idx').innerText = currentCount;
+        document.getElementById('battle-progress-text').innerText = `${progress}%`;
+        document.getElementById('battle-progress-bar').style.width = `${progress}%`;
+        document.getElementById('match-estimate-note').innerText = `預估總場次約 ${Math.round(totalMatchesEstimated)} 場`;
+      } else {
+        const currentCount = mergeState.totalComparisons + 1;
+        const progress = Math.min(Math.round((mergeState.totalComparisons / mergeState.estimatedTotal) * 100), 99);
+
+        document.getElementById('battle-round-title').innerText = `歸併排序 深度對決`;
+        document.getElementById('current-match-idx').innerText = currentCount;
+        document.getElementById('battle-progress-text').innerText = `${progress}%`;
+        document.getElementById('battle-progress-bar').style.width = `${progress}%`;
+        document.getElementById('match-estimate-note').innerText = `已對決 ${mergeState.totalComparisons} 次 (預估約 ${mergeState.estimatedTotal} 次)`;
+      }
+    }
+
+    /* ==========================================================
+       4. CHOICE HANDLING, TIES, & UNDO
+       ========================================================== */
+    function recordStateForUndo() {
+      historyStack.push({
+        mode: tournamentMode,
+        swiss: JSON.parse(JSON.stringify(swissState)),
+        merge: JSON.parse(JSON.stringify(mergeState)),
+        currentDuel: { ...currentDuel }
+      });
+      if (historyStack.length > 30) historyStack.shift();
+    }
+
+    function undoChoice() {
+      if (historyStack.length === 0) return;
+      const prev = historyStack.pop();
+      tournamentMode = prev.mode;
+      swissState = prev.swiss;
+      mergeState = prev.merge;
+      currentDuel = prev.currentDuel;
+
+      renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+      updateBattleUI();
+      showToast('已回到上一次選擇', 'ph-arrow-u-up-left');
+    }
+
+    function chooseWinner(winnerIndex) {
+      recordStateForUndo();
+
+      if (tournamentMode === 'swiss') {
+        const pA = swissState.players.find(p => p.id === currentDuel.itemA.id);
+        const pB = swissState.players.find(p => p.id === currentDuel.itemB.id);
+
+        if (winnerIndex === 0) {
+          pA.score += 1;
+        } else {
+          pB.score += 1;
+        }
+        pA.opps.push(pB.id);
+        pB.opps.push(pA.id);
+
+        swissState.pairIndex++;
+        swissState.totalCompletedMatches++;
+        nextBattleStep();
+      } else {
+        // Merge sort: 0 = Item A preferred (comes first), 1 = Item B preferred
+        if (winnerIndex === 0) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        } else {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        mergeState.totalComparisons++;
+        nextBattleStep();
+      }
+    }
+
+    function chooseTie() {
+      recordStateForUndo();
+
+      if (tournamentMode === 'swiss') {
+        const pA = swissState.players.find(p => p.id === currentDuel.itemA.id);
+        const pB = swissState.players.find(p => p.id === currentDuel.itemB.id);
+        pA.score += 0.5;
+        pB.score += 0.5;
+        pA.opps.push(pB.id);
+        pB.opps.push(pA.id);
+
+        swissState.pairIndex++;
+        swissState.totalCompletedMatches++;
+        nextBattleStep();
+      } else {
+        // For merge sort, tie picks randomly or places both sequentially
+        if (Math.random() > 0.5) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        } else {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        mergeState.totalComparisons++;
+        nextBattleStep();
+      }
+    }
+
+    function terminateEarly() {
+      if (confirm('確定要提早結束對決並以此進度結算排位嗎？')) {
+        finishTournament();
+      }
+    }
+
+    /* ==========================================================
+       5. RESULTS & TOP 8 PRESENTATION
+       ========================================================== */
+    let finalRankings = [];
+
+    function finishTournament() {
+      if (tournamentMode === 'swiss') {
+        // Calculate Buchholz score (sum of defeated/played opponents' points)
+        swissState.players.forEach(p => {
+          p.buchholz = p.opps.reduce((sum, oppId) => {
+            const opp = swissState.players.find(x => x.id === oppId);
+            return sum + (opp ? opp.score : 0);
+          }, 0);
+        });
+
+        // Sort by Score descending, then by Buchholz tiebreaker
+        finalRankings = [...swissState.players].sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return b.buchholz - a.buchholz;
+        });
+      } else {
+        // Merge sort final runs: pick remaining runs and concatenate
+        if (mergeState.runs.length > 0) {
+          let flattened = [];
+          mergeState.runs.forEach(r => flattened.push(...r));
+          finalRankings = flattened;
+        } else {
+          finalRankings = mergeState.currentMerged;
+        }
+      }
+
+      renderResults();
+      showScreen('result');
+    }
+
+    function renderResults() {
+      if (!finalRankings || finalRankings.length === 0) return;
+
+      document.getElementById('total-ranked-count').innerText = finalRankings.length;
+
+      // Podium Top 3
+      const renderPodiumSlot = (elementId, rankIdx) => {
+        const el = document.getElementById(elementId);
+        const item = finalRankings[rankIdx];
+        if (!item) {
+          el.classList.add('hidden');
+          return;
+        }
+        el.classList.remove('hidden');
+        el.querySelector('.title-slot').innerText = item.title;
+        el.querySelector('.desc-slot').innerText = item.desc || '';
+        el.querySelector('.tags-slot').innerHTML = (item.tags || []).map(t => 
+          `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-pink-300">#${escapeHtml(t)}</span>`
+        ).join(' ');
+        
+        let statText = '';
+        if (tournamentMode === 'swiss' && item.score !== undefined) {
+          statText = `勝分: ${item.score} pts · 榮譽分: ${item.buchholz || 0}`;
+        } else {
+          statText = `絕對審判位次: #${rankIdx + 1}`;
+        }
+        el.querySelector('.stat-slot').innerText = statText;
+      };
+
+      renderPodiumSlot('podium-1', 0);
+      renderPodiumSlot('podium-2', 1);
+      renderPodiumSlot('podium-3', 2);
+
+      // Ranks 4 to 8
+      const ranks4to8Container = document.getElementById('ranks-4-to-8');
+      ranks4to8Container.innerHTML = '';
+      const top8Rest = finalRankings.slice(3, 8);
+
+      top8Rest.forEach((item, idx) => {
+        const rank = idx + 4;
+        const card = document.createElement('div');
+        card.className = "bg-fandom-card rounded-xl border border-fandom-border p-3 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">#${rank}</span>
+            </div>
+            <h5 class="text-sm font-bold text-white mb-1">${escapeHtml(item.title)}</h5>
+            <p class="text-[11px] text-slate-400 line-clamp-2">${escapeHtml(item.desc || '')}</p>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-1">
+            ${(item.tags || []).map(t => `<span class="text-[9px] px-1 rounded bg-white/5 text-slate-400">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        ranks4to8Container.appendChild(card);
+      });
+
+      // Full List Accordion
+      const fullListEl = document.getElementById('full-rank-list');
+      fullListEl.innerHTML = '';
+
+      finalRankings.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = "py-2.5 flex items-center justify-between gap-3";
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="font-mono font-bold text-sm w-7 text-right ${idx < 3 ? 'text-pink-400' : 'text-slate-500'}">#${idx + 1}</span>
+            <div class="truncate">
+              <span class="font-bold text-white mr-2">${escapeHtml(item.title)}</span>
+              <span class="text-xs text-slate-400 hidden sm:inline">${escapeHtml(item.desc || '')}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            ${(item.tags || []).map(t => `<span class="text-[10px] px-1.5 py-0.5 rounded bg-fandom-card text-purple-300">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        fullListEl.appendChild(row);
+      });
+    }
+
+    function copyResultText() {
+      if (!finalRankings || finalRankings.length === 0) return;
+
+      const top8 = finalRankings.slice(0, 8);
+      let text = `【同人女 XP 殘酷二選一錦標賽 · 最終前 8 強】\n`;
+      text += `👑 冠軍：${top8[0] ? top8[0].title : ''}\n`;
+      if (top8[1]) text += `🥈 亞軍：${top8[1].title}\n`;
+      if (top8[2]) text += `🥉 季軍：${top8[2].title}\n`;
+      top8.slice(3).forEach((item, i) => {
+        text += `#${i + 4}：${item.title}\n`;
+      });
+      text += `\n測試我的同人本命屬性：#同人女XP錦標賽 #XP排序器`;
+
+      // Copy using textarea execCommand method for robust iframe compatibility
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      showToast('已複製前 8 強戰報文字至剪貼簿！可直接貼至噗浪/推特');
+    }
+
+    /* ==========================================================
+       6. REPOSITORY MANAGEMENT, ADD, EDIT, BATCH IMPORT
+       ========================================================== */
+    function renderRepoList() {
+      const container = document.getElementById('repo-list');
+      container.innerHTML = '';
+      const filter = (document.getElementById('repo-search-input').value || '').trim().toLowerCase();
+
+      const filtered = xpPool.filter(item => {
+        if (!filter) return true;
+        const inTitle = item.title.toLowerCase().includes(filter);
+        const inDesc = (item.desc || '').toLowerCase().includes(filter);
+        const inTags = (item.tags || []).some(t => t.toLowerCase().includes(filter));
+        return inTitle || inDesc || inTags;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 text-sm">找不到符合條件的 XP 詞條。</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-fandom-surface rounded-xl border border-fandom-border p-4 flex flex-col justify-between space-y-3";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="font-bold text-white text-base">${escapeHtml(item.title)}</h4>
+              <div class="flex items-center gap-1 text-slate-400">
+                <button onclick="openEditModal('${item.id}')" title="編輯" class="p-1 hover:text-pink-400 transition"><i class="ph ph-note-pencil"></i></button>
+                <button onclick="deleteRepoItem('${item.id}')" title="刪除" class="p-1 hover:text-rose-400 transition"><i class="ph ph-trash"></i></button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-300 mt-1 line-clamp-3 leading-relaxed">${escapeHtml(item.desc || '無描述')}</p>
+          </div>
+          <div class="flex flex-wrap gap-1 pt-2 border-t border-fandom-border/40">
+            ${(item.tags || []).map(t => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-fandom-card text-purple-300">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openAddModal() {
+      document.getElementById('edit-item-id').value = '';
+      document.getElementById('modal-item-title').innerHTML = '<i class="ph-bold ph-plus text-fandom-accent"></i> 新增自訂 XP 詞條';
+      document.getElementById('input-title').value = '';
+      document.getElementById('input-desc').value = '';
+      document.getElementById('input-tags').value = '';
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      const item = xpPool.find(x => x.id === id);
+      if (!item) return;
+      document.getElementById('edit-item-id').value = item.id;
+      document.getElementById('modal-item-title').innerHTML = '<i class="ph-bold ph-pencil text-fandom-accent"></i> 編輯 XP 詞條';
+      document.getElementById('input-title').value = item.title;
+      document.getElementById('input-desc').value = item.desc || '';
+      document.getElementById('input-tags').value = (item.tags || []).join(', ');
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
+
+    function saveItemFromModal() {
+      const id = document.getElementById('edit-item-id').value;
+      const title = document.getElementById('input-title').value.trim();
+      const desc = document.getElementById('input-desc').value.trim();
+      const tagsStr = document.getElementById('input-tags').value.trim();
+
+      if (!title) {
+        showToast('詞條名稱不得為空！', 'ph-warning');
+        return;
+      }
+
+      const tags = tagsStr ? tagsStr.split(/[,，\s]+/).map(t => t.trim()).filter(Boolean) : [];
+
+      if (id) {
+        // Edit existing
+        const idx = xpPool.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          xpPool[idx] = { ...xpPool[idx], title, desc, tags };
+        }
+      } else {
+        // Add new
+        const newId = 'xp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+        const newItem = { id: newId, title, desc, tags };
+        xpPool.unshift(newItem);
+        selectedIds.add(newId);
+      }
+
+      saveStorage();
+      closeModal('modal-item');
+      renderRepoList();
+      updateCounts();
+      showToast('詞條已成功儲存！');
+    }
+
+    function deleteRepoItem(id) {
+      if (confirm('確定要自詞庫中移除此 XP 詞條嗎？')) {
+        xpPool = xpPool.filter(x => x.id !== id);
+        selectedIds.delete(id);
+        saveStorage();
+        renderRepoList();
+        updateCounts();
+        showToast('已刪除詞條');
+      }
+    }
+
+    function resetToDefaults() {
+      if (confirm('確定要重設為內建預設的 10 個經典同人 XP 詞庫嗎？現有自訂內容將被覆寫。')) {
+        xpPool = [...DEFAULT_XP_LIST];
+        selectedIds = new Set(xpPool.map(i => i.id));
+        saveStorage();
+        renderRepoList();
+        updateCounts();
+        showToast('已重設為預設詞庫');
+      }
+    }
+
+    function openBatchModal() {
+      document.getElementById('modal-batch').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function loadBatchSample() {
+      document.getElementById('batch-textarea').value = 
+`支配與臣服 / 掌控欲與自願獻出自由的情感合約 / 束縛,支配,執念
+相依為命 / 荒蕪世界裡只有彼此是唯一的浮木與錨點 / 救贖,末世,深情
+雙重人格 / 愛上同一個身體裡兩種截然不同的靈魂 / 反差,精分,危險`;
+    }
+
+    function importFromBatchText() {
+      const raw = document.getElementById('batch-textarea').value.trim();
+      if (!raw) {
+        showToast('請輸入匯入內容！', 'ph-warning');
+        return;
+      }
+
+      const lines = raw.split('\n');
+      let addedCount = 0;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const parts = trimmed.split(/[/／]/).map(p => p.trim());
+        const title = parts[0];
+        const desc = parts[1] || '';
+        const tagsRaw = parts[2] || '';
+        const tags = tagsRaw ? tagsRaw.split(/[,，\s]+/).map(t => t.trim()).filter(Boolean) : [];
+
+        if (title) {
+          const newId = 'xp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+          xpPool.push({ id: newId, title, desc, tags });
+          selectedIds.add(newId);
+          addedCount++;
+        }
+      });
+
+      saveStorage();
+      closeModal('modal-batch');
+      renderRepoList();
+      updateCounts();
+      showToast(`成功批次匯入 ${addedCount} 個 XP 詞條！`);
+    }
+
+    function exportCurrentAsText() {
+      const text = xpPool.map(item => {
+        const tagPart = (item.tags || []).join(',');
+        return `${item.title} / ${item.desc || ''} / ${tagPart}`;
+      }).join('\n');
+
+      document.getElementById('batch-textarea').value = text;
+      showToast('已載入全部詞庫為純文字格式，可直接複製！');
+    }
+
+    function exportCurrentAsJSON() {
+      const jsonStr = JSON.stringify(xpPool, null, 2);
+      const tempArea = document.createElement('textarea');
+      tempArea.value = jsonStr;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('已複製詞庫 JSON 至剪貼簿！');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* Initialize Application */
+    window.onload = function() {
+      initStorage();
+      showScreen('lobby');
+    };
+  </script>
+</body>
+</html>
