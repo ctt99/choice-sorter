@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通用殘酷二選一錦標賽</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            custom: {
+              dark: '#0d0f17',
+              surface: '#151926',
+              card: '#1e2436',
+              border: '#2e3852',
+              primary: '#6366f1',
+              accent: '#ec4899',
+              glow: '#f472b6',
+              gold: '#fbbf24',
+              silver: '#cbd5e1',
+              bronze: '#d97706'
+            }
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"PingFang TC"', '"Noto Sans TC"', 'sans-serif'],
+            serif: ['"Noto Serif TC"', '"Songti TC"', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0d0f17; }
+    ::-webkit-scrollbar-thumb { background: #2e3852; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    .card-hover-fx { transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+    .card-hover-fx:hover { transform: translateY(-4px) scale(1.015); border-color: #ec4899; }
+  </style>
+</head>
+<body class="bg-custom-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-custom-accent selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="border-b border-custom-border/80 bg-custom-surface/80 backdrop-blur sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('lobby')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-custom-accent to-custom-primary flex items-center justify-center shadow-lg shadow-custom-accent/30 text-white font-bold text-lg">
+          <i class="ph-bold ph-scales"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 via-indigo-300 to-sky-300 bg-clip-text text-transparent">
+            殘酷二選一排序器
+          </h1>
+          <p class="text-xs text-indigo-300/60 hidden sm:block">自訂通用詞庫 · 三種賽制引擎 · 排定本命天梯</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="btn-nav-lobby" onclick="showScreen('lobby')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-indigo-200 hover:bg-custom-card flex items-center gap-1.5">
+          <i class="ph ph-swords text-base"></i><span>對決大廳</span>
+        </button>
+        <button id="btn-nav-repo" onclick="showScreen('repo')" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-indigo-200 hover:bg-custom-card flex items-center gap-1.5">
+          <i class="ph ph-books text-base"></i><span>詞庫管理 (<span id="nav-count">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+    <!-- SCREEN 1: LOBBY & PREPARATION -->
+    <section id="screen-lobby" class="space-y-6">
+      <div class="relative overflow-hidden rounded-2xl border border-custom-border bg-gradient-to-b from-custom-surface to-custom-dark p-6 sm:p-8">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-custom-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -top-12 w-64 h-64 bg-custom-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-2xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-custom-accent/20 text-custom-glow border border-custom-accent/40 mb-3">
+            <i class="ph-fill ph-sparkle"></i> Tournament & Ranking Engine
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white mb-2">
+            選擇對決模式，開始殘酷二選一。
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            自由自訂詞庫內容（如電影、角色、性癖、日常愛好）。可選擇極速刺激的<span class="text-pink-400 font-semibold">「傳統單淘汰」</span>、公平分層的<span class="text-indigo-400 font-semibold">「瑞士輪」</span>，或全量精確的<span class="text-purple-400 font-semibold">「歸併排序」</span>演算法！
+          </p>
+        </div>
+
+        <!-- Mode Selection (3 Modes) -->
+        <div class="mt-6 pt-6 border-t border-custom-border/60 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Traditional Single Elimination Option -->
+          <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="flex items-center gap-2 font-bold text-white text-base">
+                <input type="radio" name="tour-mode" value="knockout" checked class="accent-pink-500 w-4 h-4">
+                傳統單淘汰模式
+              </span>
+              <span id="badge-knockout-matches" class="text-xs px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono">極速 0 場</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              經典錦標賽樹狀圖（$N-1$ 場）。輸一場即淘汰，節奏緊湊刺激，最快決出終極本命第 1 名！
+            </p>
+          </label>
+
+          <!-- Swiss System Option -->
+          <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="flex items-center gap-2 font-bold text-white text-base">
+                <input type="radio" name="tour-mode" value="swiss" class="accent-indigo-500 w-4 h-4">
+                瑞士輪模式 (Swiss)
+              </span>
+              <span id="badge-swiss-matches" class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">推薦快速 8 強</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              同戰績廝殺，輸了還能打。進行約 5～6 輪對決，最具公信力快速篩出綜合戰力前 8 強。
+            </p>
+          </label>
+
+          <!-- Merge Sort Option -->
+          <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="flex items-center gap-2 font-bold text-white text-base">
+                <input type="radio" name="tour-mode" value="merge" class="accent-purple-500 w-4 h-4">
+                歸併排序 (Merge Sort)
+              </span>
+              <span id="badge-merge-matches" class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">精確全排名</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              二分法全域排序，徹底排定第 1 名到最後一名的完整天梯排行榜。
+            </p>
+          </label>
+        </div>
+      </div>
+
+      <!-- Tag Filters & Entry Selector -->
+      <div class="bg-custom-surface rounded-2xl border border-custom-border p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="ph-bold ph-funnel text-custom-glow"></i>
+              參賽詞條篩選與確認
+            </h3>
+            <p class="text-xs text-slate-400">勾選標籤或個別項目，目前已選取：<span id="selected-count-badge" class="font-bold text-custom-glow text-sm">0</span> / <span id="total-pool-count">0</span> 項</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleSelectAll(true)" class="px-2.5 py-1 text-xs rounded-lg border border-custom-border hover:bg-custom-card text-slate-300 transition">全選</button>
+            <button onclick="toggleSelectAll(false)" class="px-2.5 py-1 text-xs rounded-lg border border-custom-border hover:bg-custom-card text-slate-300 transition">全取消</button>
+          </div>
+        </div>
+
+        <!-- Tag Quick Filter Pills -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-indigo-300/80 uppercase tracking-wider">依分類 Tags 快速勾選：</label>
+          <div id="tag-pill-container" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Scrollable Items Grid -->
+        <div class="border-t border-custom-border/60 pt-3">
+          <div id="pool-item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Start Tournament Action Bar -->
+        <div class="pt-3 border-t border-custom-border flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-xs text-slate-400 flex items-center gap-2">
+            <i class="ph-bold ph-info text-indigo-400"></i>
+            <span>建議參賽數：至少 <strong class="text-pink-300">3</strong> 項（8 項以上可完整呈現前 8 強）。</span>
+          </div>
+          <button onclick="startTournament()" id="btn-start" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-custom-accent to-custom-primary hover:opacity-90 text-white font-bold shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 text-base transition transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+            <i class="ph-bold ph-play"></i>
+            開始殘酷對決
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: BATTLE ARENA (二選一對決) -->
+    <section id="screen-battle" class="hidden flex flex-col space-y-4">
+      <div class="bg-custom-surface/90 border border-custom-border rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-custom-accent animate-ping"></span>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-indigo-300 font-bold" id="battle-round-title">對決進行中</div>
+            <div class="text-sm font-semibold text-white">第 <span id="current-match-idx" class="text-pink-400 text-lg">1</span> 場對決</div>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-64 flex flex-col gap-1">
+          <div class="flex justify-between text-xs text-slate-400 font-mono">
+            <span>進度</span>
+            <span id="battle-progress-text">0%</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-custom-card overflow-hidden">
+            <div id="battle-progress-bar" class="h-full bg-gradient-to-r from-custom-primary to-custom-accent transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <span id="match-estimate-note" class="text-[10px] text-right text-slate-500">預估尚餘場次計算中...</span>
+        </div>
+      </div>
+
+      <!-- Duel Match Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 my-2">
+        <!-- Option A (Left) -->
+        <button id="card-choice-a" onclick="chooseWinner(0)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-custom-card to-custom-surface border-2 border-custom-border focus:outline-none flex flex-col justify-between min-h-[300px] shadow-xl">
+          <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-pink-300 group-hover:bg-custom-accent group-hover:text-white transition">
+            A
+          </div>
+          <div class="space-y-4">
+            <div id="tags-a" class="flex flex-wrap gap-1.5"></div>
+            <h3 id="title-a" class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight leading-snug group-hover:text-pink-300 transition"></h3>
+            <p id="desc-a" class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans"></p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-indigo-300/80">
+            <span class="group-hover:text-pink-400 transition font-medium flex items-center gap-1">
+              <i class="ph-bold ph-heart"></i> 我更偏好此項
+            </span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">[ ← 鍵選取 ]</span>
+          </div>
+        </button>
+
+        <!-- Option B (Right) -->
+        <button id="card-choice-b" onclick="chooseWinner(1)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-custom-card to-custom-surface border-2 border-custom-border focus:outline-none flex flex-col justify-between min-h-[300px] shadow-xl">
+          <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-indigo-300 group-hover:bg-custom-primary group-hover:text-white transition">
+            B
+          </div>
+          <div class="space-y-4">
+            <div id="tags-b" class="flex flex-wrap gap-1.5"></div>
+            <h3 id="title-b" class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight leading-snug group-hover:text-indigo-300 transition"></h3>
+            <p id="desc-b" class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans"></p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-indigo-300/80">
+            <span class="group-hover:text-indigo-400 transition font-medium flex items-center gap-1">
+              <i class="ph-bold ph-heart"></i> 我更偏好此項
+            </span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">[ → 鍵選取 ]</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Action Controls -->
+      <div class="flex items-center justify-center flex-wrap gap-3 pt-2">
+        <button id="btn-tie" onclick="chooseTie()" class="px-5 py-2.5 rounded-xl border border-custom-border bg-custom-surface hover:bg-custom-card text-indigo-200 text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+          <i class="ph ph-scales text-base text-amber-400"></i>
+          <span>兩者難以割捨 / 平手 [空白鍵]</span>
+        </button>
+        <button id="btn-undo" onclick="undoChoice()" disabled class="px-4 py-2.5 rounded-xl border border-custom-border bg-custom-surface hover:bg-custom-card text-slate-300 text-sm font-medium transition flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none">
+          <i class="ph ph-arrow-u-up-left text-base"></i>
+          <span>回上一步 [Z]</span>
+        </button>
+        <button onclick="terminateEarly()" class="px-4 py-2.5 rounded-xl border border-rose-900/40 bg-rose-950/20 hover:bg-rose-900/40 text-rose-300 text-sm font-medium transition flex items-center gap-1.5">
+          <i class="ph ph-stop-circle text-base"></i>
+          <span>提早結算</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: RESULT & TOP 8 HALL OF FAME -->
+    <section id="screen-result" class="hidden space-y-8 pb-12">
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/30">
+          <i class="ph-fill ph-crown"></i> 錦標賽結果公佈
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold font-serif text-white tracking-tight">
+          榮譽殿堂 · 前 8 強誕生
+        </h2>
+        <p class="text-sm text-slate-400">經過嚴格兩兩對決，你的偏好排名頂點已經確認：</p>
+      </div>
+
+      <!-- Top 3 Podium -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch pt-2">
+        <!-- #2 Silver -->
+        <div id="podium-2" class="order-2 md:order-1 bg-gradient-to-b from-custom-card to-custom-surface rounded-2xl border border-slate-400/40 p-5 flex flex-col justify-between relative shadow-lg">
+          <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-300 text-slate-900 flex items-center gap-1 shadow">
+            <i class="ph-bold ph-medal"></i> 亞軍 #2
+          </div>
+          <div class="mt-2 space-y-2">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-xl font-bold font-serif text-white"></h4>
+            <p class="desc-slot text-xs text-slate-300 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-slate-400"></div>
+        </div>
+
+        <!-- #1 Gold -->
+        <div id="podium-1" class="order-1 md:order-2 bg-gradient-to-b from-amber-950/40 via-custom-card to-custom-surface rounded-2xl border-2 border-amber-400/80 p-6 flex flex-col justify-between relative shadow-2xl md:-translate-y-3">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-300 to-yellow-500 text-slate-950 flex items-center gap-1.5 shadow-lg">
+            <i class="ph-fill ph-crown-simple text-sm"></i> 冠軍 #1 第一名
+          </div>
+          <div class="mt-3 space-y-3">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-2xl font-black font-serif text-amber-200"></h4>
+            <p class="desc-slot text-sm text-slate-200 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-amber-400/20 text-xs font-mono text-amber-300/80"></div>
+        </div>
+
+        <!-- #3 Bronze -->
+        <div id="podium-3" class="order-3 md:order-3 bg-gradient-to-b from-custom-card to-custom-surface rounded-2xl border border-amber-700/50 p-5 flex flex-col justify-between relative shadow-lg">
+          <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-700 text-amber-100 flex items-center gap-1 shadow">
+            <i class="ph-bold ph-medal"></i> 季軍 #3
+          </div>
+          <div class="mt-2 space-y-2">
+            <div class="tags-slot flex flex-wrap gap-1"></div>
+            <h4 class="title-slot text-xl font-bold font-serif text-white"></h4>
+            <p class="desc-slot text-xs text-slate-300 leading-relaxed"></p>
+          </div>
+          <div class="stat-slot mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-slate-400"></div>
+        </div>
+      </div>
+
+      <!-- Rank 4 to 8 Badges Grid -->
+      <div class="bg-custom-surface border border-custom-border rounded-2xl p-5 space-y-3">
+        <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+          <i class="ph-bold ph-star"></i> 八強列席 (第 4 ~ 8 名)
+        </h3>
+        <div id="ranks-4-to-8" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+      </div>
+
+      <!-- Full Ranking Accordion -->
+      <div class="bg-custom-surface border border-custom-border rounded-2xl p-5">
+        <details class="group">
+          <summary class="flex items-center justify-between cursor-pointer list-none text-sm font-bold text-slate-200 hover:text-white">
+            <span class="flex items-center gap-2">
+              <i class="ph-bold ph-list-numbers text-custom-accent"></i>
+              檢視全部參賽項目排位名單 (<span id="total-ranked-count"></span> 項)
+            </span>
+            <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div id="full-rank-list" class="mt-4 divide-y divide-custom-border/40 text-xs sm:text-sm"></div>
+        </details>
+      </div>
+
+      <!-- Export Actions -->
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
+        <button onclick="copyResultText()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-custom-accent to-custom-primary hover:opacity-90 text-white font-bold text-sm flex items-center gap-2 shadow-lg">
+          <i class="ph-bold ph-copy"></i> 一鍵複製前 8 強清單
+        </button>
+        <button onclick="showScreen('lobby')" class="px-5 py-2.5 rounded-xl border border-custom-border bg-custom-card hover:bg-custom-border text-slate-200 text-sm font-semibold flex items-center gap-2">
+          <i class="ph-bold ph-arrows-counter-clockwise"></i> 重新選擇 / 再測一次
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: VOCABULARY REPOSITORY MANAGEMENT -->
+    <section id="screen-repo" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-custom-border pb-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold font-serif text-white flex items-center gap-2">
+            <i class="ph-bold ph-books text-custom-glow"></i> 詞庫管理與自訂
+          </h2>
+          <p class="text-xs text-slate-400">目前詞庫存量：<span id="repo-count-badge" class="font-bold text-pink-400">0</span> 項（支援本地 localStorage 自動儲存）</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openAddModal()" class="px-3 py-1.5 rounded-lg bg-custom-accent hover:bg-pink-600 text-white text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-plus"></i> 新增單條詞條
+          </button>
+          <button onclick="openBatchModal()" class="px-3 py-1.5 rounded-lg bg-custom-card hover:bg-custom-border border border-custom-border text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-file-arrow-up"></i> 批次匯入/匯出
+          </button>
+          <button onclick="resetToDefaults()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i> 重設為預設範例
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+          <input type="text" id="repo-search-input" oninput="renderRepoList()" placeholder="搜尋詞條名稱、詳細描述或標籤..." class="w-full pl-9 pr-4 py-2 bg-custom-surface rounded-xl border border-custom-border text-sm text-slate-200 focus:outline-none focus:border-custom-accent">
+        </div>
+      </div>
+
+      <div id="repo-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD / EDIT SINGLE ITEM -->
+  <div id="modal-item" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-custom-surface border border-custom-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-custom-border pb-3">
+        <h3 id="modal-item-title" class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-bold ph-pencil-simple text-custom-accent"></i> 新增 / 編輯詞條
+        </h3>
+        <button onclick="closeModal('modal-item')" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <input type="hidden" id="edit-item-id">
+
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">名稱 *</label>
+          <input type="text" id="input-title" placeholder="請輸入詞條名稱..." class="w-full px-3 py-2 bg-custom-card rounded-lg border border-custom-border text-slate-200 focus:outline-none focus:border-custom-accent">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">分類 Tags (以半形逗號或空白分開)</label>
+          <input type="text" id="input-tags" placeholder="例如：生活, 美食, 喜好" class="w-full px-3 py-2 bg-custom-card rounded-lg border border-custom-border text-slate-200 focus:outline-none focus:border-custom-accent">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">詳細描述</label>
+          <textarea id="input-desc" rows="3" placeholder="補充說明此項目的特點、細節或背景..." class="w-full px-3 py-2 bg-custom-card rounded-lg border border-custom-border text-slate-200 focus:outline-none focus:border-custom-accent"></textarea>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-custom-border flex justify-end gap-2">
+        <button onclick="closeModal('modal-item')" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:bg-custom-card">取消</button>
+        <button onclick="saveItemFromModal()" class="px-5 py-2 rounded-lg bg-custom-accent hover:bg-pink-600 text-white text-xs font-bold shadow-lg shadow-pink-600/30">儲存詞條</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BATCH IMPORT & EXPORT -->
+  <div id="modal-batch" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-custom-surface border border-custom-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-custom-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-bold ph-arrows-left-right text-indigo-400"></i> 詞庫批次匯入 / 匯出
+        </h3>
+        <button onclick="closeModal('modal-batch')" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-300">
+          <span>支援格式：一行一筆，格式為：<strong>名稱 / 分類tags / 詳細描述</strong></span>
+          <button onclick="loadBatchSample()" class="text-custom-glow hover:underline">帶入範例格式</button>
+        </div>
+        <textarea id="batch-textarea" rows="8" placeholder="星際效應 / 科幻,探索 / 穿越蟲洞與黑洞尋求人類存續的硬科幻名作
+全面啟動 / 懸疑,動作 / 潛入潛意識偷取與植入概念的夢境之戰
+刺激1995 / 經典,劇情 / 希望是件美好的事，也許是世間最美好的事物" class="w-full font-mono text-xs px-3 py-2 bg-custom-card rounded-lg border border-custom-border text-slate-200 focus:outline-none focus:border-custom-accent"></textarea>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-custom-border">
+        <div class="flex gap-2">
+          <button onclick="exportCurrentAsText()" class="px-3 py-1.5 rounded-lg border border-custom-border hover:bg-custom-card text-xs text-indigo-300">產生目前文字匯出</button>
+          <button onclick="exportCurrentAsJSON()" class="px-3 py-1.5 rounded-lg border border-custom-border hover:bg-custom-card text-xs text-indigo-300">複製 JSON</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-batch')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300">關閉</button>
+          <button onclick="importFromBatchText()" class="px-4 py-1.5 rounded-lg bg-custom-accent hover:bg-pink-600 text-white text-xs font-bold">確認匯入新增</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Box -->
+  <div id="toast-box" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-xl bg-custom-card border border-custom-accent/60 text-white text-sm shadow-xl shadow-black/50">
+    <i id="toast-icon" class="ph-bold ph-check text-custom-glow text-lg"></i>
+    <span id="toast-msg">通知內容</span>
+  </div>
+
+  <script>
+    /* ==========================================================
+       1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
+       ========================================================== */
+    const DEFAULT_POOL = [
+	  {
+		id: "item_1",
+		title: "雨夜末班車與無聲陪伴",
+		tags: ["陪伴", "氛圍感", "療癒"],
+		desc: "車窗外的雨水模糊了霓虹，身邊的人沒有多說一句話，只是把耳機分了一半給你。世界很吵，但這裡很安靜。"
+	  },
+	  {
+		id: "item_2",
+		title: "反派殉道者與最後的尊嚴",
+		tags: ["宿命", "悲壯", "美學"],
+		desc: "站在全世界的對立面，哪怕明知是既定的末路，依然優雅地整理好領口赴死，至死不向世俗低下高傲的頭顱。"
+	  },
+	  {
+		id: "item_3",
+		title: "心照不宣的絕對默契",
+		tags: ["靈魂共鳴", "羈絆", "信任"],
+		desc: "不需言語對視，甚至不需要在同一個空間，就能在關鍵時刻精準替對方補上最後一塊拼圖或扣下扳機的信任感。"
+	  },
+	  {
+		id: "item_4",
+		title: "神壇跌落與泥濘共生",
+		tags: ["反差", "救贖", "情感拉扯"],
+		desc: "曾高高在上不可一世的存在，在被命運踐踏至泥沼時，唯有另一個同樣殘破的靈魂接住了他所有的狼狽與脆弱。"
+	  },
+	  {
+		id: "item_5",
+		title: "久別重逢但彼此早已認出",
+		tags: ["宿命", "重逢", "酸甜"],
+		desc: "經過數年歲月或時空流轉，即使容顏與身份全非，交會的那一眼依然能在人海中瞬間穿透偽裝、認出彼此靈魂。"
+	  },
+	  {
+		id: "item_6",
+		title: "理智崩塌的失控瞬間",
+		tags: ["張力", "反差", "極限對抗"],
+		desc: "平時最冷靜克制、滴水不漏的掌局者，在觸及底線或深愛之人的生死時，徹底撕碎面具、露出近乎瘋魔的偏執。"
+	  },
+	  {
+		id: "item_7",
+		title: "宿敵在黃昏廢墟裡的最後和解",
+		tags: ["羈絆", "宿命", "釋懷"],
+		desc: "鬥了一輩子、招招見血的對手，在世界崩塌後的餘燼前並肩坐下，遞出一根菸或水壺，共享一生僅有一次的平靜。"
+	  },
+	  {
+		id: "item_8",
+		title: "暴風雨夜的孤島壁爐",
+		tags: ["安全感", "密閉空間", "依戀"],
+		desc: "窗外狂風怒號、與世隔絕，屋內只有柴火劈啪與毛毯的溫度。只要這扇門不打開，全世界的災難就與我們無關。"
+	  },
+	  {
+		id: "item_9",
+		title: "以惡制惡的孤獨執法者",
+		tags: ["暗黑", "原則", "正義"],
+		desc: "不指望被任何人理解，甘願弄髒雙手墮入地獄，只為在無人注視的陰影裡鏟除真正的惡蛆與虛偽的秩序。"
+	  },
+	  {
+		id: "item_10",
+		title: "年少約定在現實殘酷下的褪色",
+		tags: ["痛感", "現實", "遺憾"],
+		desc: "曾經在夏夜星空下發誓永遠不變的誓言，在成人世界的柴米油鹽與名利碾壓下，相視一笑時只剩下客氣與無言以對。"
+	  },
+	  {
+		id: "item_11",
+		title: "深淵邊緣的盲目信任",
+		tags: ["信任", "極限", "羈絆"],
+		desc: "哪怕眼前是萬丈懸崖，只要對方伸出手說了一聲『跳』，連一秒鐘的猶豫都沒有就縱身躍入虛無。"
+	  },
+	  {
+		id: "item_12",
+		title: "平淡街角的市井煙火長情",
+		tags: ["日常甜", "細水長流", "陪伴"],
+		desc: "沒有轟轟烈烈的冒險，只有菜市場的討價還價、睡前互相暖腳，以及幾十年如一日在玄關為對方留的那盞昏黃小燈。"
+	  }
+	];
+
+    let itemPool = [];
+    let selectedIds = new Set();
+
+    function initStorage() {
+      const saved = localStorage.getItem('generic_cruel_pool_v1');
+      if (saved) {
+        try {
+          itemPool = JSON.parse(saved);
+        } catch (e) {
+          itemPool = [...DEFAULT_POOL];
+        }
+      } else {
+        itemPool = [...DEFAULT_POOL];
+        saveStorage();
+      }
+      selectedIds = new Set(itemPool.map(i => i.id));
+    }
+
+    function saveStorage() {
+      localStorage.setItem('generic_cruel_pool_v1', JSON.stringify(itemPool));
+    }
+
+    function showToast(message, icon = 'ph-check') {
+      const toast = document.getElementById('toast-box');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      toastMsg.innerText = message;
+      toastIcon.className = `ph-bold ${icon} text-custom-glow text-lg`;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    /* ==========================================================
+       2. UI 畫面切換與資料渲染
+       ========================================================== */
+    function showScreen(screenId) {
+      ['screen-lobby', 'screen-battle', 'screen-result', 'screen-repo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+
+      document.getElementById('btn-nav-lobby').classList.toggle('text-pink-400', screenId === 'lobby');
+      document.getElementById('btn-nav-repo').classList.toggle('text-pink-400', screenId === 'repo');
+
+      if (screenId === 'lobby') {
+        renderLobby();
+      } else if (screenId === 'repo') {
+        renderRepoList();
+      }
+      updateCounts();
+    }
+
+    function updateCounts() {
+	  const count = itemPool.length;
+	  const selectedCount = selectedIds.size; // 目前勾選的詞條數量
+
+	  document.getElementById('nav-count').innerText = count;
+	  document.getElementById('repo-count-badge').innerText = count;
+	  document.getElementById('total-pool-count').innerText = count;
+	  document.getElementById('selected-count-badge').innerText = selectedCount;
+
+	  // 動態更新單淘汰場次標籤 (N - 1 場)
+	  const knockoutBadge = document.getElementById('badge-knockout-matches');
+	  if (knockoutBadge) {
+		const matches = selectedCount > 1 ? selectedCount - 1 : 0;
+		knockoutBadge.innerText = `極速 ${matches} 場`;
+	  }
+	  // 1. 瑞士輪估算場次：(N / 2) * 輪數 (輪數依 N 落在 3~6 輪)
+		const swissBadge = document.getElementById('badge-swiss-matches');
+		if (swissBadge) {
+		  let rounds = 5;
+		  if (selectedCount <= 8) rounds = 3;
+		  else if (selectedCount <= 16) rounds = 4;
+		  else if (selectedCount <= 32) rounds = 5;
+		  else rounds = 6;
+		  const swissMatches = Math.round((selectedCount / 2) * rounds);
+		  swissBadge.innerText = selectedCount >= 3 ? `約 ${swissMatches} 場` : '推薦快速 8 強';
+		}
+
+		// 2. 歸併排序估算場次：N * log2(N)
+		const mergeBadge = document.getElementById('badge-merge-matches');
+		if (mergeBadge) {
+		  const mergeMatches = selectedCount > 1 ? Math.round(selectedCount * Math.log2(selectedCount)) : 0;
+		  mergeBadge.innerText = selectedCount >= 3 ? `約 ${mergeMatches} 場` : '精確全排名';
+		}
+	}
+	
+    function renderLobby() {
+      updateCounts();
+      renderTagPills();
+      renderPoolItems();
+    }
+
+    function getAllTags() {
+      const tags = new Set();
+      itemPool.forEach(item => {
+        (item.tags || []).forEach(t => tags.add(t.trim()));
+      });
+      return Array.from(tags).filter(Boolean);
+    }
+
+    function renderTagPills() {
+      const container = document.getElementById('tag-pill-container');
+      container.innerHTML = '';
+      const tags = getAllTags();
+
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = "px-2.5 py-1 rounded-full text-xs font-medium border border-custom-border bg-custom-card/80 hover:border-pink-500 text-slate-300 transition flex items-center gap-1";
+        btn.innerHTML = `<span>#${escapeHtml(tag)}</span>`;
+        btn.onclick = () => toggleSelectByTag(tag);
+        container.appendChild(btn);
+      });
+    }
+
+    function toggleSelectByTag(tag) {
+      const matchingItems = itemPool.filter(i => (i.tags || []).includes(tag));
+      const allSelected = matchingItems.every(i => selectedIds.has(i.id));
+
+      matchingItems.forEach(item => {
+        if (allSelected) {
+          selectedIds.delete(item.id);
+        } else {
+          selectedIds.add(item.id);
+        }
+      });
+      renderPoolItems();
+      updateCounts();
+      showToast(allSelected ? `已取消選取標籤 #${tag}` : `已選取標籤 #${tag} 的全部詞條`);
+    }
+
+    function toggleSelectAll(selectAll) {
+      if (selectAll) {
+        selectedIds = new Set(itemPool.map(i => i.id));
+      } else {
+        selectedIds.clear();
+      }
+      renderPoolItems();
+      updateCounts();
+    }
+
+    function renderPoolItems() {
+      const grid = document.getElementById('pool-item-grid');
+      grid.innerHTML = '';
+
+      itemPool.forEach(item => {
+        const isSelected = selectedIds.has(item.id);
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border text-left cursor-pointer transition select-none flex flex-col justify-between ${
+          isSelected 
+            ? 'bg-indigo-950/20 border-custom-accent/60 text-white' 
+            : 'bg-custom-card/40 border-custom-border/60 text-slate-400 opacity-60'
+        }`;
+        card.onclick = () => {
+          if (selectedIds.has(item.id)) {
+            selectedIds.delete(item.id);
+          } else {
+            selectedIds.add(item.id);
+          }
+          renderPoolItems();
+          updateCounts();
+        };
+
+        const tagsHtml = (item.tags || []).map(t => 
+          `<span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-indigo-300">#${escapeHtml(t)}</span>`
+        ).join(' ');
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-sm tracking-tight ${isSelected ? 'text-pink-300' : 'text-slate-300'}">${escapeHtml(item.title)}</span>
+              <span class="text-base">${isSelected ? '<i class="ph-fill ph-check-circle text-pink-400"></i>' : '<i class="ph ph-circle text-slate-500"></i>'}</span>
+            </div>
+            <p class="text-[11px] line-clamp-2 text-slate-400">${escapeHtml(item.desc || '')}</p>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-1">${tagsHtml}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ==========================================================
+       3. 錦標賽對決引擎 (Knockout / Swiss / Merge Sort)
+       ========================================================== */
+    let tournamentMode = 'knockout'; // 'knockout' | 'swiss' | 'merge'
+    let currentDuel = null;
+    let historyStack = [];
+
+    // 單淘汰模式狀態
+    let knockoutState = {
+      roundsQueue: [],      // 每一層級的淘汰對決名單
+      currentRoundItems: [],
+      nextRoundWinners: [],
+      matchIdx: 0,
+      totalMatches: 0,
+      completedMatches: 0,
+      eliminationTiers: {}  // 記錄淘汰階段，便於推導前 8 強排位
+    };
+
+    // 瑞士輪模式狀態
+    let swissState = {
+      players: [],
+      roundsTotal: 5,
+      currentRound: 1,
+      currentPairings: [],
+      pairIndex: 0,
+      totalCompletedMatches: 0
+    };
+
+    // 歸併排序模式狀態
+    let mergeState = {
+      items: [],
+      runs: [],
+      mergeA: [],
+      mergeB: [],
+      currentMerged: [],
+      ptrA: 0,
+      ptrB: 0,
+      totalComparisons: 0,
+      estimatedTotal: 100
+    };
+
+    function startTournament() {
+      const activeIds = Array.from(selectedIds);
+      if (activeIds.length < 3) {
+        showToast('請至少選擇 3 個詞條以開始對決！', 'ph-warning');
+        return;
+      }
+
+      const modeInput = document.querySelector('input[name="tour-mode"]:checked');
+      tournamentMode = modeInput ? modeInput.value : 'knockout';
+      historyStack = [];
+
+      const participants = itemPool.filter(i => selectedIds.has(i.id));
+
+      if (tournamentMode === 'knockout') {
+        initKnockoutTournament(participants);
+      } else if (tournamentMode === 'swiss') {
+        initSwissTournament(participants);
+      } else {
+        initMergeSortTournament(participants);
+      }
+
+      showScreen('battle');
+      nextBattleStep();
+    }
+
+    // --- 傳統單淘汰演算法 ---
+    function initKnockoutTournament(participants) {
+      const shuffled = shuffleArray(participants);
+      const n = shuffled.length;
+      
+      // 計算最靠近且大於等於 n 的 2 次冪，處理輪空 (Bye)
+      let pow = 1;
+      while (pow < n) pow *= 2;
+      const numByes = pow - n;
+      const round1Count = n - numByes; // 第一輪需交鋒的人數
+
+      const round1Contenders = shuffled.slice(0, round1Count);
+      const byeAdvance = shuffled.slice(round1Count); // 自動輪空保送下一輪者
+
+      knockoutState = {
+        currentRoundItems: round1Contenders,
+        nextRoundWinners: [...byeAdvance],
+        matchIdx: 0,
+        totalMatches: n - 1, // 錦標賽經典總場次 N - 1
+        completedMatches: 0,
+        eliminationTiers: {
+          roundRanks: [] // 倒序記錄淘汰者
+        }
+      };
+    }
+
+    function nextKnockoutStep() {
+      // 本輪打完，晉級至下一輪
+      if (knockoutState.matchIdx * 2 >= knockoutState.currentRoundItems.length) {
+        if (knockoutState.nextRoundWinners.length === 1) {
+          // 冠軍誕生！
+          finishTournament();
+          return;
+        }
+
+        // 進入下一輪對決
+        knockoutState.currentRoundItems = shuffleArray(knockoutState.nextRoundWinners);
+        knockoutState.nextRoundWinners = [];
+        knockoutState.matchIdx = 0;
+      }
+
+      const idxA = knockoutState.matchIdx * 2;
+      const idxB = idxA + 1;
+      const itemA = knockoutState.currentRoundItems[idxA];
+      const itemB = knockoutState.currentRoundItems[idxB];
+
+      currentDuel = { itemA, itemB };
+      renderBattleCards(itemA, itemB);
+      updateBattleUI();
+    }
+
+    // --- 瑞士輪演算法 ---
+    function initSwissTournament(participants) {
+      const shuffled = shuffleArray(participants);
+      const n = shuffled.length;
+      let rounds = 5;
+      if (n <= 8) rounds = 3;
+      else if (n <= 16) rounds = 4;
+      else if (n <= 32) rounds = 5;
+      else rounds = 6;
+
+      swissState = {
+        players: shuffled.map(p => ({
+          ...p,
+          score: 0,
+          opps: [],
+          buchholz: 0
+        })),
+        roundsTotal: rounds,
+        currentRound: 1,
+        currentPairings: [],
+        pairIndex: 0,
+        totalCompletedMatches: 0
+      };
+
+      generateSwissRoundPairings();
+    }
+
+    function generateSwissRoundPairings() {
+      const shuffled = shuffleArray(swissState.players);
+      const sorted = shuffled.sort((a, b) => b.score - a.score);
+
+      const pairings = [];
+      const paired = new Set();
+
+      for (let i = 0; i < sorted.length; i++) {
+        if (paired.has(sorted[i].id)) continue;
+        const p1 = sorted[i];
+
+        let bestOpp = null;
+        for (let j = i + 1; j < sorted.length; j++) {
+          const cand = sorted[j];
+          if (!paired.has(cand.id) && !p1.opps.includes(cand.id)) {
+            bestOpp = cand;
+            break;
+          }
+        }
+
+        if (!bestOpp) {
+          for (let j = i + 1; j < sorted.length; j++) {
+            if (!paired.has(sorted[j].id)) {
+              bestOpp = sorted[j];
+              break;
+            }
+          }
+        }
+
+        if (bestOpp) {
+          const pair = Math.random() > 0.5 ? [p1, bestOpp] : [bestOpp, p1];
+          pairings.push(pair);
+          paired.add(p1.id);
+          paired.add(bestOpp.id);
+        } else {
+          p1.score += 1;
+          paired.add(p1.id);
+        }
+      }
+
+      swissState.currentPairings = shuffleArray(pairings);
+      swissState.pairIndex = 0;
+    }
+
+    function nextSwissStep() {
+      if (swissState.pairIndex >= swissState.currentPairings.length) {
+        if (swissState.currentRound >= swissState.roundsTotal) {
+          finishTournament();
+          return;
+        }
+        swissState.currentRound++;
+        generateSwissRoundPairings();
+      }
+
+      const pair = swissState.currentPairings[swissState.pairIndex];
+      currentDuel = { itemA: pair[0], itemB: pair[1] };
+      renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+      updateBattleUI();
+    }
+
+    // --- 歸併排序演算法 ---
+    function initMergeSortTournament(participants) {
+      const shuffled = shuffleArray(participants);
+      const runs = shuffled.map(item => [item]);
+      const n = participants.length;
+      const estimated = Math.round(n * Math.log2(n || 1));
+
+      mergeState = {
+        items: shuffled,
+        runs: runs,
+        mergeA: [],
+        mergeB: [],
+        currentMerged: [],
+        ptrA: 0,
+        ptrB: 0,
+        totalComparisons: 0,
+        estimatedTotal: Math.max(estimated, 1)
+      };
+
+      prepareNextMergeStep();
+    }
+
+    function prepareNextMergeStep() {
+      if (mergeState.runs.length <= 1) {
+        finishTournament();
+        return;
+      }
+      mergeState.mergeA = mergeState.runs.shift();
+      mergeState.mergeB = mergeState.runs.shift();
+      mergeState.currentMerged = [];
+      mergeState.ptrA = 0;
+      mergeState.ptrB = 0;
+    }
+
+    function nextMergeStep() {
+      if (mergeState.ptrA < mergeState.mergeA.length && mergeState.ptrB < mergeState.mergeB.length) {
+        currentDuel = {
+          itemA: mergeState.mergeA[mergeState.ptrA],
+          itemB: mergeState.mergeB[mergeState.ptrB]
+        };
+        renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+        updateBattleUI();
+      } else {
+        while (mergeState.ptrA < mergeState.mergeA.length) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        }
+        while (mergeState.ptrB < mergeState.mergeB.length) {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        mergeState.runs.push(mergeState.currentMerged);
+
+        if (mergeState.runs.length <= 1) {
+          finishTournament();
+        } else {
+          prepareNextMergeStep();
+          nextMergeStep();
+        }
+      }
+    }
+
+    // --- 對決派發 ---
+    function nextBattleStep() {
+      if (tournamentMode === 'knockout') {
+        nextKnockoutStep();
+      } else if (tournamentMode === 'swiss') {
+        nextSwissStep();
+      } else {
+        nextMergeStep();
+      }
+    }
+
+    function renderBattleCards(itemA, itemB) {
+      document.getElementById('title-a').innerText = itemA.title;
+      document.getElementById('desc-a').innerText = itemA.desc || '無特定描述。';
+      document.getElementById('tags-a').innerHTML = (itemA.tags || []).map(t => 
+        `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-pink-500/10 border border-pink-500/30 text-pink-300">#${escapeHtml(t)}</span>`
+      ).join('');
+
+      document.getElementById('title-b').innerText = itemB.title;
+      document.getElementById('desc-b').innerText = itemB.desc || '無特定描述。';
+      document.getElementById('tags-b').innerHTML = (itemB.tags || []).map(t => 
+        `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">#${escapeHtml(t)}</span>`
+      ).join('');
+    }
+
+    function updateBattleUI() {
+      document.getElementById('btn-undo').disabled = historyStack.length === 0;
+
+      if (tournamentMode === 'knockout') {
+        const total = knockoutState.totalMatches;
+        const current = knockoutState.completedMatches + 1;
+        const progress = Math.min(Math.round((knockoutState.completedMatches / total) * 100), 99);
+        const alive = knockoutState.currentRoundItems.length + knockoutState.nextRoundWinners.length;
+
+        document.getElementById('battle-round-title').innerText = `單淘汰錦標賽 (剩餘 ${alive} 強)`;
+        document.getElementById('current-match-idx').innerText = current;
+        document.getElementById('battle-progress-text').innerText = `${progress}%`;
+        document.getElementById('battle-progress-bar').style.width = `${progress}%`;
+        document.getElementById('match-estimate-note').innerText = `共需 ${total} 場 (進度 ${knockoutState.completedMatches}/${total})`;
+        document.getElementById('btn-tie').classList.remove('hidden');
+      } else if (tournamentMode === 'swiss') {
+        const totalMatchesEstimated = (swissState.players.length / 2) * swissState.roundsTotal;
+        const currentCount = swissState.totalCompletedMatches + 1;
+        const progress = Math.min(Math.round((swissState.totalCompletedMatches / totalMatchesEstimated) * 100), 99);
+
+        document.getElementById('battle-round-title').innerText = `瑞士輪 第 ${swissState.currentRound} / ${swissState.roundsTotal} 輪`;
+        document.getElementById('current-match-idx').innerText = currentCount;
+        document.getElementById('battle-progress-text').innerText = `${progress}%`;
+        document.getElementById('battle-progress-bar').style.width = `${progress}%`;
+        document.getElementById('match-estimate-note').innerText = `預估總場次約 ${Math.round(totalMatchesEstimated)} 場`;
+        document.getElementById('btn-tie').classList.remove('hidden');
+      } else {
+        const currentCount = mergeState.totalComparisons + 1;
+        const progress = Math.min(Math.round((mergeState.totalComparisons / mergeState.estimatedTotal) * 100), 99);
+
+        document.getElementById('battle-round-title').innerText = `歸併排序 深度對決`;
+        document.getElementById('current-match-idx').innerText = currentCount;
+        document.getElementById('battle-progress-text').innerText = `${progress}%`;
+        document.getElementById('battle-progress-bar').style.width = `${progress}%`;
+        document.getElementById('match-estimate-note').innerText = `已對決 ${mergeState.totalComparisons} 次 (預估約 ${mergeState.estimatedTotal} 次)`;
+        document.getElementById('btn-tie').classList.remove('hidden');
+      }
+    }
+
+    /* ==========================================================
+       4. 選擇邏輯、平手與上一步
+       ========================================================== */
+    function recordStateForUndo() {
+      historyStack.push({
+        mode: tournamentMode,
+        knockout: JSON.parse(JSON.stringify(knockoutState)),
+        swiss: JSON.parse(JSON.stringify(swissState)),
+        merge: JSON.parse(JSON.stringify(mergeState)),
+        currentDuel: { ...currentDuel }
+      });
+      if (historyStack.length > 30) historyStack.shift();
+    }
+
+    function undoChoice() {
+      if (historyStack.length === 0) return;
+      const prev = historyStack.pop();
+      tournamentMode = prev.mode;
+      knockoutState = prev.knockout;
+      swissState = prev.swiss;
+      mergeState = prev.merge;
+      currentDuel = prev.currentDuel;
+
+      renderBattleCards(currentDuel.itemA, currentDuel.itemB);
+      updateBattleUI();
+      showToast('已回到上一次選擇', 'ph-arrow-u-up-left');
+    }
+
+    function chooseWinner(winnerIndex) {
+      recordStateForUndo();
+
+      if (tournamentMode === 'knockout') {
+        const winner = winnerIndex === 0 ? currentDuel.itemA : currentDuel.itemB;
+        const loser = winnerIndex === 0 ? currentDuel.itemB : currentDuel.itemA;
+
+        knockoutState.nextRoundWinners.push(winner);
+        // 將敗者推入該輪淘汰隊列，保持排位推導
+        if (!knockoutState.eliminationTiers.roundRanks) knockoutState.eliminationTiers.roundRanks = [];
+        knockoutState.eliminationTiers.roundRanks.push(loser);
+
+        knockoutState.matchIdx++;
+        knockoutState.completedMatches++;
+        nextBattleStep();
+      } else if (tournamentMode === 'swiss') {
+        const pA = swissState.players.find(p => p.id === currentDuel.itemA.id);
+        const pB = swissState.players.find(p => p.id === currentDuel.itemB.id);
+
+        if (winnerIndex === 0) {
+          pA.score += 1;
+        } else {
+          pB.score += 1;
+        }
+        pA.opps.push(pB.id);
+        pB.opps.push(pA.id);
+
+        swissState.pairIndex++;
+        swissState.totalCompletedMatches++;
+        nextBattleStep();
+      } else {
+        if (winnerIndex === 0) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        } else {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        mergeState.totalComparisons++;
+        nextBattleStep();
+      }
+    }
+
+    function chooseTie() {
+      recordStateForUndo();
+
+      if (tournamentMode === 'knockout') {
+        // 單淘汰必須產生勝者，平手隨機決定一人晉級
+        const rndWinner = Math.random() > 0.5 ? 0 : 1;
+        showToast('單淘汰制平手：隨機指派一方晉級');
+        chooseWinner(rndWinner);
+      } else if (tournamentMode === 'swiss') {
+        const pA = swissState.players.find(p => p.id === currentDuel.itemA.id);
+        const pB = swissState.players.find(p => p.id === currentDuel.itemB.id);
+        pA.score += 0.5;
+        pB.score += 0.5;
+        pA.opps.push(pB.id);
+        pB.opps.push(pA.id);
+
+        swissState.pairIndex++;
+        swissState.totalCompletedMatches++;
+        nextBattleStep();
+      } else {
+        if (Math.random() > 0.5) {
+          mergeState.currentMerged.push(mergeState.mergeA[mergeState.ptrA++]);
+        } else {
+          mergeState.currentMerged.push(mergeState.mergeB[mergeState.ptrB++]);
+        }
+        mergeState.totalComparisons++;
+        nextBattleStep();
+      }
+    }
+
+    function terminateEarly() {
+      if (confirm('確定要提早結束對決並以此進度結算排位嗎？')) {
+        finishTournament();
+      }
+    }
+
+    // 鍵盤快捷鍵支援
+    window.addEventListener('keydown', (e) => {
+      const battleScreen = document.getElementById('screen-battle');
+      if (battleScreen.classList.contains('hidden')) return;
+
+      if (e.key === 'ArrowLeft') {
+        chooseWinner(0);
+      } else if (e.key === 'ArrowRight') {
+        chooseWinner(1);
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        chooseTie();
+      } else if (e.key === 'z' || e.key === 'Z') {
+        undoChoice();
+      }
+    });
+
+    /* ==========================================================
+       5. 結果呈現與前 8 強殿堂
+       ========================================================== */
+    let finalRankings = [];
+
+    function finishTournament() {
+      if (tournamentMode === 'knockout') {
+        // 冠軍為最後倖存者，其餘排名依照淘汰先後反轉（越晚淘汰排名越高）
+        const champion = knockoutState.nextRoundWinners[0] || knockoutState.currentRoundItems[0];
+        const losersReversed = [...(knockoutState.eliminationTiers.roundRanks || [])].reverse();
+        // 排除可能重複的項目
+        const seen = new Set();
+        finalRankings = [champion, ...losersReversed].filter(item => {
+          if (!item || seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+      } else if (tournamentMode === 'swiss') {
+        swissState.players.forEach(p => {
+          p.buchholz = p.opps.reduce((sum, oppId) => {
+            const opp = swissState.players.find(x => x.id === oppId);
+            return sum + (opp ? opp.score : 0);
+          }, 0);
+        });
+
+        finalRankings = [...swissState.players].sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return b.buchholz - a.buchholz;
+        });
+      } else {
+        if (mergeState.runs.length > 0) {
+          let flattened = [];
+          mergeState.runs.forEach(r => flattened.push(...r));
+          finalRankings = flattened;
+        } else {
+          finalRankings = mergeState.currentMerged;
+        }
+      }
+
+      renderResults();
+      showScreen('result');
+    }
+
+    function renderResults() {
+      if (!finalRankings || finalRankings.length === 0) return;
+
+      document.getElementById('total-ranked-count').innerText = finalRankings.length;
+
+      const renderPodiumSlot = (elementId, rankIdx) => {
+        const el = document.getElementById(elementId);
+        const item = finalRankings[rankIdx];
+        if (!item) {
+          el.classList.add('hidden');
+          return;
+        }
+        el.classList.remove('hidden');
+        el.querySelector('.title-slot').innerText = item.title;
+        el.querySelector('.desc-slot').innerText = item.desc || '';
+        el.querySelector('.tags-slot').innerHTML = (item.tags || []).map(t => 
+          `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-pink-300">#${escapeHtml(t)}</span>`
+        ).join(' ');
+        
+        let statText = '';
+        if (tournamentMode === 'knockout') {
+          statText = rankIdx === 0 ? `🏆 冠軍決賽勝出` : rankIdx === 1 ? `🥈 決賽席位` : `準決賽席位`;
+        } else if (tournamentMode === 'swiss' && item.score !== undefined) {
+          statText = `勝分: ${item.score} pts · 榮譽分: ${item.buchholz || 0}`;
+        } else {
+          statText = `位次: #${rankIdx + 1}`;
+        }
+        el.querySelector('.stat-slot').innerText = statText;
+      };
+
+      renderPodiumSlot('podium-1', 0);
+      renderPodiumSlot('podium-2', 1);
+      renderPodiumSlot('podium-3', 2);
+
+      const ranks4to8Container = document.getElementById('ranks-4-to-8');
+      ranks4to8Container.innerHTML = '';
+      const top8Rest = finalRankings.slice(3, 8);
+
+      top8Rest.forEach((item, idx) => {
+        const rank = idx + 4;
+        const card = document.createElement('div');
+        card.className = "bg-custom-card rounded-xl border border-custom-border p-3 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">#${rank}</span>
+            </div>
+            <h5 class="text-sm font-bold text-white mb-1">${escapeHtml(item.title)}</h5>
+            <p class="text-[11px] text-slate-400 line-clamp-2">${escapeHtml(item.desc || '')}</p>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-1">
+            ${(item.tags || []).map(t => `<span class="text-[9px] px-1 rounded bg-white/5 text-slate-400">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        ranks4to8Container.appendChild(card);
+      });
+
+      const fullListEl = document.getElementById('full-rank-list');
+      fullListEl.innerHTML = '';
+
+      finalRankings.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = "py-2.5 flex items-center justify-between gap-3";
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="font-mono font-bold text-sm w-7 text-right ${idx < 3 ? 'text-pink-400' : 'text-slate-500'}">#${idx + 1}</span>
+            <div class="truncate">
+              <span class="font-bold text-white mr-2">${escapeHtml(item.title)}</span>
+              <span class="text-xs text-slate-400 hidden sm:inline">${escapeHtml(item.desc || '')}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            ${(item.tags || []).map(t => `<span class="text-[10px] px-1.5 py-0.5 rounded bg-custom-card text-indigo-300">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        fullListEl.appendChild(row);
+      });
+    }
+
+    function copyResultText() {
+      if (!finalRankings || finalRankings.length === 0) return;
+
+      const top8 = finalRankings.slice(0, 8);
+      let text = `【殘酷二選一錦標賽 · 最終前 8 強】\n`;
+      text += `👑 冠軍：${top8[0] ? top8[0].title : ''}\n`;
+      if (top8[1]) text += `🥈 亞軍：${top8[1].title}\n`;
+      if (top8[2]) text += `🥉 季軍：${top8[2].title}\n`;
+      top8.slice(3).forEach((item, i) => {
+        text += `#${i + 4}：${item.title}\n`;
+      });
+      text += `\n自訂詞條錦標賽排序結果`;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      showToast('已複製前 8 強清單至剪貼簿！');
+    }
+
+    /* ==========================================================
+       6. 詞庫管理 (名稱 / 分類tags / 詳細描述)
+       ========================================================== */
+    function renderRepoList() {
+      const container = document.getElementById('repo-list');
+      container.innerHTML = '';
+      const filter = (document.getElementById('repo-search-input').value || '').trim().toLowerCase();
+
+      const filtered = itemPool.filter(item => {
+        if (!filter) return true;
+        const inTitle = item.title.toLowerCase().includes(filter);
+        const inDesc = (item.desc || '').toLowerCase().includes(filter);
+        const inTags = (item.tags || []).some(t => t.toLowerCase().includes(filter));
+        return inTitle || inDesc || inTags;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 text-sm">找不到符合條件的詞條。</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-custom-surface rounded-xl border border-custom-border p-4 flex flex-col justify-between space-y-3";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="font-bold text-white text-base">${escapeHtml(item.title)}</h4>
+              <div class="flex items-center gap-1 text-slate-400">
+                <button onclick="openEditModal('${item.id}')" title="編輯" class="p-1 hover:text-pink-400 transition"><i class="ph ph-note-pencil"></i></button>
+                <button onclick="deleteRepoItem('${item.id}')" title="刪除" class="p-1 hover:text-rose-400 transition"><i class="ph ph-trash"></i></button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-300 mt-1 line-clamp-3 leading-relaxed">${escapeHtml(item.desc || '無詳細描述')}</p>
+          </div>
+          <div class="flex flex-wrap gap-1 pt-2 border-t border-custom-border/40">
+            ${(item.tags || []).map(t => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-custom-card text-indigo-300">#${escapeHtml(t)}</span>`).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openAddModal() {
+      document.getElementById('edit-item-id').value = '';
+      document.getElementById('modal-item-title').innerHTML = '<i class="ph-bold ph-plus text-custom-accent"></i> 新增詞條';
+      document.getElementById('input-title').value = '';
+      document.getElementById('input-tags').value = '';
+      document.getElementById('input-desc').value = '';
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      const item = itemPool.find(x => x.id === id);
+      if (!item) return;
+      document.getElementById('edit-item-id').value = item.id;
+      document.getElementById('modal-item-title').innerHTML = '<i class="ph-bold ph-pencil text-custom-accent"></i> 編輯詞條';
+      document.getElementById('input-title').value = item.title;
+      document.getElementById('input-tags').value = (item.tags || []).join(', ');
+      document.getElementById('input-desc').value = item.desc || '';
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
+
+    function saveItemFromModal() {
+      const id = document.getElementById('edit-item-id').value;
+      const title = document.getElementById('input-title').value.trim();
+      const tagsStr = document.getElementById('input-tags').value.trim();
+      const desc = document.getElementById('input-desc').value.trim();
+
+      if (!title) {
+        showToast('名稱不得為空！', 'ph-warning');
+        return;
+      }
+
+      const tags = tagsStr ? tagsStr.split(/[,，\s]+/).map(t => t.trim()).filter(Boolean) : [];
+
+      if (id) {
+        const idx = itemPool.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          itemPool[idx] = { ...itemPool[idx], title, tags, desc };
+        }
+      } else {
+        const newId = 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+        const newItem = { id: newId, title, tags, desc };
+        itemPool.unshift(newItem);
+        selectedIds.add(newId);
+      }
+
+      saveStorage();
+      closeModal('modal-item');
+      renderRepoList();
+      updateCounts();
+      showToast('詞條已成功儲存！');
+    }
+
+    function deleteRepoItem(id) {
+      if (confirm('確定要移除此詞條嗎？')) {
+        itemPool = itemPool.filter(x => x.id !== id);
+        selectedIds.delete(id);
+        saveStorage();
+        renderRepoList();
+        updateCounts();
+        showToast('已刪除詞條');
+      }
+    }
+
+    function resetToDefaults() {
+      if (confirm('確定要重設為預設詞庫嗎？現有自訂內容將被覆寫。')) {
+        itemPool = [...DEFAULT_POOL];
+        selectedIds = new Set(itemPool.map(i => i.id));
+        saveStorage();
+        renderRepoList();
+        updateCounts();
+        showToast('已重設為預設範例');
+      }
+    }
+
+    function openBatchModal() {
+      document.getElementById('modal-batch').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function loadBatchSample() {
+      document.getElementById('batch-textarea').value = 
+`星際效應 / 科幻,探索 / 穿越蟲洞與黑洞尋求人類存續的硬科幻名作
+全面啟動 / 懸疑,動作 / 潛入潛意識偷取與植入概念的夢境之戰
+刺激1995 / 經典,劇情 / 希望是件美好的事，也許是世間最美好的事物`;
+    }
+
+    function importFromBatchText() {
+      const raw = document.getElementById('batch-textarea').value.trim();
+      if (!raw) {
+        showToast('請輸入匯入內容！', 'ph-warning');
+        return;
+      }
+
+      const lines = raw.split('\n');
+      let addedCount = 0;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const parts = trimmed.split(/[/／]/).map(p => p.trim());
+        const title = parts[0];
+        const tagsRaw = parts[1] || '';
+        const desc = parts[2] || '';
+        const tags = tagsRaw ? tagsRaw.split(/[,，\s]+/).map(t => t.trim()).filter(Boolean) : [];
+
+        if (title) {
+          const newId = 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+          itemPool.push({ id: newId, title, tags, desc });
+          selectedIds.add(newId);
+          addedCount++;
+        }
+      });
+
+      saveStorage();
+      closeModal('modal-batch');
+      renderRepoList();
+      updateCounts();
+      showToast(`成功批次匯入 ${addedCount} 個詞條！`);
+    }
+
+    function exportCurrentAsText() {
+      const text = itemPool.map(item => {
+        const tagPart = (item.tags || []).join(',');
+        return `${item.title} / ${tagPart} / ${item.desc || ''}`;
+      }).join('\n');
+
+      document.getElementById('batch-textarea').value = text;
+      showToast('已載入全部詞庫為純文字格式，可直接複製！');
+    }
+
+    function exportCurrentAsJSON() {
+      const jsonStr = JSON.stringify(itemPool, null, 2);
+      const tempArea = document.createElement('textarea');
+      tempArea.value = jsonStr;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('已複製詞庫 JSON 至剪貼簿！');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.onload = function() {
+      initStorage();
+      showScreen('lobby');
+    };
+  </script>
+</body>
+</html>
