@@ -8,8 +8,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-	<!-- 先加載詞庫檔案 -->
-<script src="default-pool.js"></script>
+  
+  <!-- 加載多個預設詞庫檔案 -->
+  <script src="default-pool.js"></script>
+  <script src="default-pool2.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -59,7 +62,7 @@
           <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 via-indigo-300 to-sky-300 bg-clip-text text-transparent">
             殘酷二選一排序器
           </h1>
-          <p class="text-xs text-indigo-300/60 hidden sm:block">自訂通用詞庫 · 三種賽制引擎 · 排定本命天梯</p>
+          <p class="text-xs text-indigo-300/60 hidden sm:block">多預設詞庫 · 三種賽制引擎 · 排定本命天梯</p>
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -90,13 +93,12 @@
             選擇對決模式，開始殘酷二選一。
           </h2>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            自由自訂詞庫內容（如電影、角色、性癖、日常愛好）。可選擇極速刺激的<span class="text-pink-400 font-semibold">「傳統單淘汰」</span>、公平分層的<span class="text-indigo-400 font-semibold">「瑞士輪」</span>，或全量精確的<span class="text-purple-400 font-semibold">「歸併排序」</span>演算法！
+            自由自訂詞庫內容（如電影、動漫、生活風格）。可選擇極速刺激的<span class="text-pink-400 font-semibold">「傳統單淘汰」</span>、公平分層的<span class="text-indigo-400 font-semibold">「瑞士輪」</span>，或全量精確的<span class="text-purple-400 font-semibold">「歸併排序」</span>演算法！
           </p>
         </div>
 
         <!-- Mode Selection (3 Modes) -->
         <div class="mt-6 pt-6 border-t border-custom-border/60 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Traditional Single Elimination Option -->
           <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
             <div class="flex items-center justify-between mb-2">
               <span class="flex items-center gap-2 font-bold text-white text-base">
@@ -106,11 +108,10 @@
               <span id="badge-knockout-matches" class="text-xs px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono">極速 0 場</span>
             </div>
             <p class="text-xs text-slate-400">
-              經典錦標賽樹狀圖（$N-1$ 場）。輸一場即淘汰，節奏緊湊刺激，最快決出終極本命第 1 名！
+              經典錦標賽淘汰樹（N-1 場）。一戰定生死、節奏極快，最快決出終極第 1 名！
             </p>
           </label>
 
-          <!-- Swiss System Option -->
           <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
             <div class="flex items-center justify-between mb-2">
               <span class="flex items-center gap-2 font-bold text-white text-base">
@@ -120,11 +121,10 @@
               <span id="badge-swiss-matches" class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">推薦快速 8 強</span>
             </div>
             <p class="text-xs text-slate-400">
-              同戰績廝殺，輸了還能打。進行約 5～6 輪對決，最具公信力快速篩出綜合戰力前 8 強。
+              同戰績廝殺，輸了還能打。進行約 5～6 輪對決，最具公信力快速篩出綜合前 8 強。
             </p>
           </label>
 
-          <!-- Merge Sort Option -->
           <label class="relative flex flex-col p-4 rounded-xl border border-custom-border bg-custom-card/50 hover:bg-custom-card cursor-pointer transition select-none">
             <div class="flex items-center justify-between mb-2">
               <span class="flex items-center gap-2 font-bold text-white text-base">
@@ -156,18 +156,15 @@
           </div>
         </div>
 
-        <!-- Tag Quick Filter Pills -->
         <div class="space-y-1.5">
           <label class="text-xs font-semibold text-indigo-300/80 uppercase tracking-wider">依分類 Tags 快速勾選：</label>
           <div id="tag-pill-container" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Scrollable Items Grid -->
         <div class="border-t border-custom-border/60 pt-3">
           <div id="pool-item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Start Tournament Action Bar -->
         <div class="pt-3 border-t border-custom-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="text-xs text-slate-400 flex items-center gap-2">
             <i class="ph-bold ph-info text-indigo-400"></i>
@@ -204,9 +201,7 @@
         </div>
       </div>
 
-      <!-- Duel Match Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 my-2">
-        <!-- Option A (Left) -->
         <button id="card-choice-a" onclick="chooseWinner(0)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-custom-card to-custom-surface border-2 border-custom-border focus:outline-none flex flex-col justify-between min-h-[300px] shadow-xl">
           <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-pink-300 group-hover:bg-custom-accent group-hover:text-white transition">
             A
@@ -224,7 +219,6 @@
           </div>
         </button>
 
-        <!-- Option B (Right) -->
         <button id="card-choice-b" onclick="chooseWinner(1)" class="card-hover-fx text-left group relative p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-custom-card to-custom-surface border-2 border-custom-border focus:outline-none flex flex-col justify-between min-h-[300px] shadow-xl">
           <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-indigo-300 group-hover:bg-custom-primary group-hover:text-white transition">
             B
@@ -243,7 +237,6 @@
         </button>
       </div>
 
-      <!-- Action Controls -->
       <div class="flex items-center justify-center flex-wrap gap-3 pt-2">
         <button id="btn-tie" onclick="chooseTie()" class="px-5 py-2.5 rounded-xl border border-custom-border bg-custom-surface hover:bg-custom-card text-indigo-200 text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
           <i class="ph ph-scales text-base text-amber-400"></i>
@@ -272,9 +265,7 @@
         <p class="text-sm text-slate-400">經過嚴格兩兩對決，你的偏好排名頂點已經確認：</p>
       </div>
 
-      <!-- Top 3 Podium -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch pt-2">
-        <!-- #2 Silver -->
         <div id="podium-2" class="order-2 md:order-1 bg-gradient-to-b from-custom-card to-custom-surface rounded-2xl border border-slate-400/40 p-5 flex flex-col justify-between relative shadow-lg">
           <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-300 text-slate-900 flex items-center gap-1 shadow">
             <i class="ph-bold ph-medal"></i> 亞軍 #2
@@ -287,7 +278,6 @@
           <div class="stat-slot mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-slate-400"></div>
         </div>
 
-        <!-- #1 Gold -->
         <div id="podium-1" class="order-1 md:order-2 bg-gradient-to-b from-amber-950/40 via-custom-card to-custom-surface rounded-2xl border-2 border-amber-400/80 p-6 flex flex-col justify-between relative shadow-2xl md:-translate-y-3">
           <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-300 to-yellow-500 text-slate-950 flex items-center gap-1.5 shadow-lg">
             <i class="ph-fill ph-crown-simple text-sm"></i> 冠軍 #1 第一名
@@ -300,7 +290,6 @@
           <div class="stat-slot mt-4 pt-3 border-t border-amber-400/20 text-xs font-mono text-amber-300/80"></div>
         </div>
 
-        <!-- #3 Bronze -->
         <div id="podium-3" class="order-3 md:order-3 bg-gradient-to-b from-custom-card to-custom-surface rounded-2xl border border-amber-700/50 p-5 flex flex-col justify-between relative shadow-lg">
           <div class="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-700 text-amber-100 flex items-center gap-1 shadow">
             <i class="ph-bold ph-medal"></i> 季軍 #3
@@ -314,7 +303,6 @@
         </div>
       </div>
 
-      <!-- Rank 4 to 8 Badges Grid -->
       <div class="bg-custom-surface border border-custom-border rounded-2xl p-5 space-y-3">
         <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
           <i class="ph-bold ph-star"></i> 八強列席 (第 4 ~ 8 名)
@@ -322,7 +310,6 @@
         <div id="ranks-4-to-8" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
       </div>
 
-      <!-- Full Ranking Accordion -->
       <div class="bg-custom-surface border border-custom-border rounded-2xl p-5">
         <details class="group">
           <summary class="flex items-center justify-between cursor-pointer list-none text-sm font-bold text-slate-200 hover:text-white">
@@ -336,7 +323,6 @@
         </details>
       </div>
 
-      <!-- Export Actions -->
       <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
         <button onclick="copyResultText()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-custom-accent to-custom-primary hover:opacity-90 text-white font-bold text-sm flex items-center gap-2 shadow-lg">
           <i class="ph-bold ph-copy"></i> 一鍵複製前 8 強清單
@@ -356,15 +342,22 @@
           </h2>
           <p class="text-xs text-slate-400">目前詞庫存量：<span id="repo-count-badge" class="font-bold text-pink-400">0</span> 項（支援本地 localStorage 自動儲存）</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button onclick="openAddModal()" class="px-3 py-1.5 rounded-lg bg-custom-accent hover:bg-pink-600 text-white text-xs font-bold flex items-center gap-1.5 transition">
-            <i class="ph-bold ph-plus"></i> 新增單條詞條
+            <i class="ph-bold ph-plus"></i> 新增詞條
           </button>
           <button onclick="openBatchModal()" class="px-3 py-1.5 rounded-lg bg-custom-card hover:bg-custom-border border border-custom-border text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
-            <i class="ph-bold ph-file-arrow-up"></i> 批次匯入/匯出
+            <i class="ph-bold ph-file-arrow-up"></i> 批次匯入/出
           </button>
-          <button onclick="resetToDefaults()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition">
-            <i class="ph-bold ph-arrow-counter-clockwise"></i> 重設為預設範例
+          
+          <!-- 切換 / 選擇預設詞庫按鈕 -->
+          <button onclick="openPresetModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-squares-four"></i> 預設詞庫選單
+          </button>
+
+          <!-- 一鍵清空詞庫按鈕 -->
+          <button onclick="clearAllPool()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-trash"></i> 一鍵清空
           </button>
         </div>
       </div>
@@ -448,6 +441,31 @@
     </div>
   </div>
 
+  <!-- MODAL: PRESET POOL CHOOSER (預設詞庫選單 / 混合載入) -->
+  <div id="modal-preset" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-custom-surface border border-custom-border rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-custom-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-bold ph-squares-four text-indigo-400"></i> 選擇預設詞庫或混合
+        </h3>
+        <button onclick="closeModal('modal-preset')" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <p class="text-xs text-slate-300">可選擇單獨載入覆蓋、或將多個官方詞庫「混合合併」到當前詞庫中：</p>
+
+      <div class="space-y-3" id="preset-options-container">
+        <!-- 動態渲染各個預設詞庫選項卡 -->
+      </div>
+
+      <div class="pt-4 border-t border-custom-border flex flex-wrap items-center justify-between gap-2">
+        <button onclick="mergeAllPresets()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white text-xs font-bold shadow-md flex items-center gap-1.5">
+          <i class="ph-bold ph-git-merge"></i> 混合載入全部預設詞庫
+        </button>
+        <button onclick="closeModal('modal-preset')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-custom-card">關閉</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Box -->
   <div id="toast-box" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-xl bg-custom-card border border-custom-accent/60 text-white text-sm shadow-xl shadow-black/50">
     <i id="toast-icon" class="ph-bold ph-check text-custom-glow text-lg"></i>
@@ -456,22 +474,38 @@
 
   <script>
     /* ==========================================================
-       1. 資料庫與 STORAGE (名稱 / 分類tags / 詳細描述)
+       1. 預設詞庫管理註冊中心 (支援多 JS 檔獨立宣告)
        ========================================================== */
+    // 定義預設詞庫登錄表
+    const PRESET_POOLS = [
+      {
+        key: 'XP',
+        name: 'XP',
+        desc: '同人女XP屬性錦標賽!多項CP屬性、關係性、世界觀設定的詞彙資料庫',
+        getPool: () => (typeof POOL_LIFESTYLE !== 'undefined' ? POOL_LIFESTYLE : (typeof DEFAULT_POOL !== 'undefined' ? DEFAULT_POOL : []))
+      },
+      {
+        key: 'anime',
+        name: '神作動漫與殿堂電影',
+        desc: '包含鋼鍊、巨人、星際效應、全面啟動、石頭門等口碑神作。',
+        getPool: () => (typeof POOL_ANIME !== 'undefined' ? POOL_ANIME : [])
+      }
+    ];
+
     let itemPool = [];
     let selectedIds = new Set();
 
     function initStorage() {
-      // 讀取本地儲存（若為首次進入或舊版本，則以 external js 的 DEFAULT_POOL 為準）
       const saved = localStorage.getItem('choice_pool_v2');
       if (saved) {
         try {
           itemPool = JSON.parse(saved);
         } catch (e) {
-          itemPool = typeof DEFAULT_POOL !== 'undefined' ? [...DEFAULT_POOL] : [];
+          itemPool = PRESET_POOLS[0].getPool();
         }
       } else {
-        itemPool = typeof DEFAULT_POOL !== 'undefined' ? [...DEFAULT_POOL] : [];
+        // 第一次預設載入預設詞庫
+        itemPool = [...PRESET_POOLS[0].getPool()];
         saveStorage();
       }
       selectedIds = new Set(itemPool.map(i => i.id));
@@ -532,14 +566,12 @@
       document.getElementById('total-pool-count').innerText = count;
       document.getElementById('selected-count-badge').innerText = selectedCount;
 
-      // 1. 動態更新單淘汰場次標籤 (N - 1 場)
       const knockoutBadge = document.getElementById('badge-knockout-matches');
       if (knockoutBadge) {
         const matches = selectedCount > 1 ? selectedCount - 1 : 0;
         knockoutBadge.innerText = `極速 ${matches} 場`;
       }
 
-      // 2. 瑞士輪估算場次：(N / 2) * 輪數
       const swissBadge = document.getElementById('badge-swiss-matches');
       if (swissBadge) {
         let rounds = 5;
@@ -551,7 +583,6 @@
         swissBadge.innerText = selectedCount >= 3 ? `約 ${swissMatches} 場` : '推薦快速 8 強';
       }
 
-      // 3. 歸併排序估算場次：N * log2(N)
       const mergeBadge = document.getElementById('badge-merge-matches');
       if (mergeBadge) {
         const mergeMatches = selectedCount > 1 ? Math.round(selectedCount * Math.log2(selectedCount)) : 0;
@@ -617,6 +648,11 @@
       const grid = document.getElementById('pool-item-grid');
       grid.innerHTML = '';
 
+      if (itemPool.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-500 text-xs">目前詞庫為空，請前往「詞庫管理」新增或載入預設詞庫。</div>`;
+        return;
+      }
+
       itemPool.forEach(item => {
         const isSelected = selectedIds.has(item.id);
         const card = document.createElement('div');
@@ -654,7 +690,7 @@
     }
 
     /* ==========================================================
-       3. 錦標賽對決引擎 (Knockout / Swiss / Merge Sort)
+       3. 錦標賽對決引擎
        ========================================================== */
     let tournamentMode = 'knockout';
     let currentDuel = null;
@@ -757,8 +793,9 @@
       const itemA = knockoutState.currentRoundItems[idxA];
       const itemB = knockoutState.currentRoundItems[idxB];
 
-      currentDuel = { itemA, itemB };
-      renderBattleCards(itemA, itemB);
+      const pair = Math.random() > 0.5 ? [itemA, itemB] : [itemB, itemA];
+      currentDuel = { itemA: pair[0], itemB: pair[1] };
+      renderBattleCards(currentDuel.itemA, currentDuel.itemB);
       updateBattleUI();
     }
 
@@ -945,7 +982,6 @@
         document.getElementById('battle-progress-text').innerText = `${progress}%`;
         document.getElementById('battle-progress-bar').style.width = `${progress}%`;
         document.getElementById('match-estimate-note').innerText = `共需 ${total} 場 (進度 ${knockoutState.completedMatches}/${total})`;
-        document.getElementById('btn-tie').classList.remove('hidden');
       } else if (tournamentMode === 'swiss') {
         const totalMatchesEstimated = (swissState.players.length / 2) * swissState.roundsTotal;
         const currentCount = swissState.totalCompletedMatches + 1;
@@ -956,7 +992,6 @@
         document.getElementById('battle-progress-text').innerText = `${progress}%`;
         document.getElementById('battle-progress-bar').style.width = `${progress}%`;
         document.getElementById('match-estimate-note').innerText = `預估總場次約 ${Math.round(totalMatchesEstimated)} 場`;
-        document.getElementById('btn-tie').classList.remove('hidden');
       } else {
         const currentCount = mergeState.totalComparisons + 1;
         const progress = Math.min(Math.round((mergeState.totalComparisons / mergeState.estimatedTotal) * 100), 99);
@@ -966,7 +1001,6 @@
         document.getElementById('battle-progress-text').innerText = `${progress}%`;
         document.getElementById('battle-progress-bar').style.width = `${progress}%`;
         document.getElementById('match-estimate-note').innerText = `已對決 ${mergeState.totalComparisons} 次 (預估約 ${mergeState.estimatedTotal} 次)`;
-        document.getElementById('btn-tie').classList.remove('hidden');
       }
     }
 
@@ -1233,7 +1267,7 @@
     }
 
     /* ==========================================================
-       6. 詞庫管理 (名稱 / 分類tags / 詳細描述)
+       6. 詞庫管理與多預設詞庫切換/清空邏輯
        ========================================================== */
     function renderRepoList() {
       const container = document.getElementById('repo-list');
@@ -1249,7 +1283,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 text-sm">找不到符合條件的詞條。</div>`;
+        container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 text-sm">找不到詞條（目前詞庫可能為空或無符合搜尋項）。</div>`;
         return;
       }
 
@@ -1275,6 +1309,115 @@
       });
     }
 
+    // --- 一鍵清空功能 ---
+    function clearAllPool() {
+      if (itemPool.length === 0) {
+        showToast('目前詞庫已經是空的！', 'ph-info');
+        return;
+      }
+      if (confirm('【危險操作】確定要一鍵清空目前詞庫中的所有項目嗎？這將方便您從零建立專屬詞庫。')) {
+        itemPool = [];
+        selectedIds.clear();
+        saveStorage();
+        renderRepoList();
+        updateCounts();
+        showToast('詞庫已全數清空！您可以開始新增或匯入自己的詞條。', 'ph-trash');
+      }
+    }
+
+    // --- 預設詞庫彈窗與載入切換 ---
+    function openPresetModal() {
+      const container = document.getElementById('preset-options-container');
+      container.innerHTML = '';
+
+      PRESET_POOLS.forEach(preset => {
+        const count = preset.getPool().length;
+        const div = document.createElement('div');
+        div.className = "p-3.5 rounded-xl border border-custom-border bg-custom-card/60 flex items-center justify-between gap-3";
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-sm text-white">${escapeHtml(preset.name)}</h4>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-mono">${count} 條</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(preset.desc)}</p>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="applySinglePreset('${preset.key}', false)" class="px-3 py-1.5 rounded-lg border border-custom-border hover:bg-custom-surface text-xs text-slate-200 transition">
+              覆蓋更換
+            </button>
+            <button onclick="applySinglePreset('${preset.key}', true)" class="px-3 py-1.5 rounded-lg bg-custom-accent/20 hover:bg-custom-accent/30 text-custom-glow border border-custom-accent/30 text-xs font-semibold transition">
+              + 合併追加
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('modal-preset').classList.remove('hidden');
+    }
+
+    function applySinglePreset(key, isAppend = false) {
+      const preset = PRESET_POOLS.find(p => p.key === key);
+      if (!preset) return;
+
+      const sourceItems = preset.getPool();
+      if (sourceItems.length === 0) {
+        showToast('此預設詞庫目前無資料，請確認 JS 檔案是否已正確載入！', 'ph-warning');
+        return;
+      }
+
+      if (isAppend) {
+        // 合併追加（去重 ID）
+        const existingIds = new Set(itemPool.map(i => i.id));
+        let added = 0;
+        sourceItems.forEach(item => {
+          if (!existingIds.has(item.id)) {
+            itemPool.push({ ...item });
+            selectedIds.add(item.id);
+            added++;
+          }
+        });
+        showToast(`已追加「${preset.name}」共 ${added} 條新項目！`);
+      } else {
+        if (!confirm(`確定要將當前詞庫替換為「${preset.name}」嗎？現有自訂內容將被覆蓋。`)) return;
+        itemPool = sourceItems.map(i => ({ ...i }));
+        selectedIds = new Set(itemPool.map(i => i.id));
+        showToast(`已成功載入「${preset.name}」！`);
+      }
+
+      saveStorage();
+      closeModal('modal-preset');
+      renderRepoList();
+      updateCounts();
+    }
+
+    function mergeAllPresets() {
+      if (!confirm('確定要將所有預設詞庫合併載入嗎？現有詞庫將與所有官方預設集融合。')) return;
+
+      const map = new Map();
+      // 先保留現有詞庫
+      itemPool.forEach(i => map.set(i.id, i));
+
+      // 依序疊加所有預設詞庫
+      PRESET_POOLS.forEach(p => {
+        p.getPool().forEach(item => {
+          if (!map.has(item.id)) {
+            map.set(item.id, { ...item });
+          }
+        });
+      });
+
+      itemPool = Array.from(map.values());
+      selectedIds = new Set(itemPool.map(i => i.id));
+      saveStorage();
+      closeModal('modal-preset');
+      renderRepoList();
+      updateCounts();
+      showToast(`已成功混合所有預設詞庫！目前總計 ${itemPool.length} 條。`);
+    }
+
+    // --- 單條增改 ---
     function openAddModal() {
       document.getElementById('edit-item-id').value = '';
       document.getElementById('modal-item-title').innerHTML = '<i class="ph-bold ph-plus text-custom-accent"></i> 新增詞條';
@@ -1335,17 +1478,6 @@
         renderRepoList();
         updateCounts();
         showToast('已刪除詞條');
-      }
-    }
-
-    function resetToDefaults() {
-      if (confirm('確定要重設為預設詞庫嗎？現有自訂內容將被覆寫。')) {
-        itemPool = [...DEFAULT_POOL];
-        selectedIds = new Set(itemPool.map(i => i.id));
-        saveStorage();
-        renderRepoList();
-        updateCounts();
-        showToast('已重設為預設範例');
       }
     }
 
