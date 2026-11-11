@@ -12,6 +12,7 @@
   <!-- 加載多個預設詞庫檔案 -->
   <script src="default-pool.js"></script>
   <script src="default-pool2.js"></script>
+  <script src="default-pool3.js"></script>
 
   <script>
     tailwind.config = {
@@ -479,41 +480,48 @@
     // 定義預設詞庫登錄表
     const PRESET_POOLS = [
       {
-        key: 'XP',
-        name: 'XP',
+        key: 'CP_XP',
+        name: 'XP_CP',
         desc: '同人女XP屬性錦標賽!多項CP屬性、關係性、世界觀設定的詞彙資料庫',
-        getPool: () => (typeof POOL_LIFESTYLE !== 'undefined' ? POOL_LIFESTYLE : (typeof DEFAULT_POOL !== 'undefined' ? DEFAULT_POOL : []))
+        getPool: () => (typeof POOL_CPXP !== 'undefined' ? POOL_CPXP : (typeof DEFAULT_POOL !== 'undefined' ? DEFAULT_POOL : []))
       },
       {
         key: 'anime',
         name: '神作動漫與殿堂電影',
         desc: '包含鋼鍊、巨人、星際效應、全面啟動、石頭門等口碑神作。',
         getPool: () => (typeof POOL_ANIME !== 'undefined' ? POOL_ANIME : [])
-      }
+      },
+	  {
+		key: 'gaming', // 放在第 1 位，成為預設開啟詞庫！
+		name: '殿堂級遊戲大作',
+		desc: '包含曠野之息、法環、巫師、2077 等經典大作。',
+		getPool: () => (typeof POOL_GAMING !== 'undefined' ? POOL_GAMING : [])
+	  }
     ];
 
     let itemPool = [];
     let selectedIds = new Set();
 
     function initStorage() {
-      const saved = localStorage.getItem('choice_pool_v2');
-      if (saved) {
-        try {
-          itemPool = JSON.parse(saved);
-        } catch (e) {
-          itemPool = PRESET_POOLS[0].getPool();
-        }
-      } else {
-        // 第一次預設載入預設詞庫
-        itemPool = [...PRESET_POOLS[0].getPool()];
-        saveStorage();
-      }
-      selectedIds = new Set(itemPool.map(i => i.id));
-    }
+	  // 將 v2 改為 v3，強制瀏覽器抓取排在第 1 位的全新預設詞庫
+	  const saved = localStorage.getItem('choice_pool_v3');
+	  if (saved) {
+		try {
+		  itemPool = JSON.parse(saved);
+		} catch (e) {
+		  itemPool = PRESET_POOLS[0].getPool();
+		}
+	  } else {
+		// 首次進入時直接載入 PRESET_POOLS[0]（即第 3 個詞庫）
+		itemPool = [...PRESET_POOLS[0].getPool()];
+		saveStorage();
+	  }
+	  selectedIds = new Set(itemPool.map(i => i.id));
+	}
 
-    function saveStorage() {
-      localStorage.setItem('choice_pool_v2', JSON.stringify(itemPool));
-    }
+	function saveStorage() {
+	  localStorage.setItem('choice_pool_v3', JSON.stringify(itemPool));
+	}
 
     function showToast(message, icon = 'ph-check') {
       const toast = document.getElementById('toast-box');
